@@ -18,7 +18,7 @@ Esto causa:
 
 ## 💡 La Solución con HTML5 Canvas y ScrollTrigger
 
-La arquitectura Senior utiliza un único elemento `<canvas>`:
+Una implementación limpia utiliza un único elemento `<canvas>`:
 - **Interpolación en memoria:** Un objeto numérico (`sequence = { frame: 0 }`) se anima mediante GSAP con `scrollTrigger: { scrub: 0.5 }`.
 - **Renderizado directo en GPU:** En el callback `onUpdate`, el frame se dibuja directamente sobre el contexto 2D del Canvas (`ctx.drawImage()` o cálculo vectorial en microsegundos).
 - **Cero parpadeo:** El buffer de dibujo se actualiza de forma síncrona con el refresco de pantalla del monitor (V-Sync).

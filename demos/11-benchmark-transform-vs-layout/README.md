@@ -27,13 +27,13 @@ Al usar `transform: translate3d(x, y, 0)` o los alias de GSAP `x` e `y`:
 - El hilo principal de JavaScript queda 100% libre para responder a eventos de usuario sin latencia (INP y TBT en 0 ms).
 
 ```javascript
-// ❌ MALA PRÁCTICA (Fuerza Layout y Reflow 60 veces/s)
+// ❌ NO RECOMENDADO (Fuerza Layout y Reflow 60 veces/s)
 gsap.to('.elemento', {
   top: '200px',
   left: '300px'
 });
 
-// ✅ ESTÁNDAR SENIOR (Directo a la GPU, 0 ms de bloqueo de CPU)
+// ✅ BUENAS PRÁCTICAS (Directo a la GPU, 0 ms de bloqueo de CPU)
 gsap.to('.elemento', {
   y: 200,
   x: 300,

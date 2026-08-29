@@ -121,26 +121,24 @@
       white-space: nowrap;
     }
 
-    .desktop-nav { display: flex; align-items: center; gap: 0.4rem; }
-    @media (max-width: 900px) { .desktop-nav { display: none; } }
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
 
-    .nav-pill {
+    @media (max-width: 820px) { .desktop-nav { display: none; } }
+
+    .nav-link {
       font-family: var(--font-code);
-      font-size: 0.75rem;
-      padding: 0.35rem 0.65rem;
-      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
       color: var(--text-muted);
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease;
       white-space: nowrap;
     }
 
-    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
-    .nav-pill--active {
-      color: var(--accent-primary);
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-    }
+    .nav-link:hover { color: var(--text-main); }
 
     .header-actions { display: flex; align-items: center; gap: 0.75rem; }
 
@@ -483,16 +481,12 @@
       </a>
 
       <nav class="desktop-nav" aria-label="Navegación">
-        <a href="../01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
-        <a href="../02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
-        <a href="../03-loops-desfasados/index.html" class="nav-pill">03. Loops</a>
-        <a href="../04-suspension-viewport/index.html" class="nav-pill">04. Viewport IO</a>
-        <a href="../05-carga-condicional/index.html" class="nav-pill">05. rAF Guard</a>
-        <a href="index.html" class="nav-pill nav-pill--active">06. Zero CLS</a>
+        <a href="../../index.html" class="nav-link">← Catálogo de Demos</a>
+        <a href="README.md" class="nav-link" target="_blank" rel="noopener">README //</a>
       </nav>
 
       <div class="header-actions">
-        <a href="README.md" class="btn-action" target="_blank" rel="noopener"><span>//</span> README</a>
+        <button id="btnReplay" class="btn-action"><span>↺</span> Replay</button>
         <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -502,14 +496,19 @@
 
   <!-- Mobile Drawer -->
   <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
-    <span class="mobile-drawer__title">Demos Técnicas</span>
-    <a href="../01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entradas 3D</span> <span>→</span></a>
-    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa</span> <span>→</span></a>
-    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos</span> <span>→</span></a>
-    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport</span> <span>→</span></a>
-    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional</span> <span>→</span></a>
-    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>06. Recálculo Imágenes</span> <span>→</span></a>
-    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-primary);"><span>← Volver al Hub Principal</span></a>
+    <span class="mobile-drawer__title">Catálogo Completo (11 Demos)</span>
+    <a href="../01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entradas 3D & CustomEase</span> <span>→</span></a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa & Scrub</span> <span>→</span></a>
+    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos Desfasados</span> <span>→</span></a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport (CPU Saver)</span> <span>→</span></a>
+    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional & Guard rAF</span> <span>→</span></a>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>06. Recálculo tras Imágenes & Zero CLS</span> <span>→</span></a>
+    <a href="../07-matchmedia-responsive/index.html" class="mobile-nav-link"><span>07. Timelines con gsap.matchMedia()</span> <span>→</span></a>
+    <a href="../08-context-cleanup/index.html" class="mobile-nav-link"><span>08. Aislamiento y Limpieza con gsap.context()</span> <span>→</span></a>
+    <a href="../09-texto-revelado-lineas/index.html" class="mobile-nav-link"><span>09. Texto Revelado sin Plugins de Pago</span> <span>→</span></a>
+    <a href="../10-canvas-secuencia-scroll/index.html" class="mobile-nav-link"><span>10. Canvas con Secuencia por Scroll</span> <span>→</span></a>
+    <a href="../11-benchmark-transform-vs-layout/index.html" class="mobile-nav-link"><span>11. Benchmark: transform vs top/left</span> <span>→</span></a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-seal); margin-top: 0.5rem;"><span>← Volver al Hub Principal</span></a>
   </div>
 
   <main class="page-main">
@@ -596,7 +595,7 @@
     <span>ScrollTrigger.refresh() ejecutado (Coordenadas sincronizadas)</span>
   </div>
 
-  <!-- Senior Footer -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="site-footer__container">
       <div>

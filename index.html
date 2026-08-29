@@ -33,6 +33,10 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background-color: var(--bg-base);
       background-image: 
@@ -69,6 +73,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 1rem;
     }
 
     /* brante.dev Brand Header */
@@ -79,6 +84,7 @@
       text-decoration: none;
       color: var(--text-main);
       transition: opacity 0.2s ease;
+      flex-shrink: 0;
     }
 
     .site-header__brand:hover { opacity: 0.9; }
@@ -124,28 +130,38 @@
       white-space: nowrap;
     }
 
-    .desktop-nav { display: flex; align-items: center; gap: 0.35rem; }
-    @media (max-width: 950px) { .desktop-nav { display: none; } }
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
 
-    .nav-pill {
+    @media (max-width: 820px) {
+      .desktop-nav { display: none; }
+    }
+
+    .nav-link {
       font-family: var(--font-code);
-      font-size: 0.75rem;
-      padding: 0.35rem 0.65rem;
-      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
       color: var(--text-muted);
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease;
       white-space: nowrap;
     }
 
-    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+    .nav-link:hover { color: var(--text-main); }
 
-    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
 
     .btn-action {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
       padding: 0.4rem 0.85rem;
       font-family: var(--font-code);
       font-size: 0.78rem;
@@ -167,7 +183,7 @@
     }
 
     .btn-hamburger {
-      display: none;
+      display: flex;
       flex-direction: column;
       justify-content: center;
       gap: 5px;
@@ -179,8 +195,6 @@
       cursor: pointer;
       padding: 8px;
     }
-
-    @media (max-width: 950px) { .btn-hamburger { display: flex; } }
 
     .btn-hamburger span {
       display: block;
@@ -207,7 +221,7 @@
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.65rem;
       overflow-y: auto;
       transform: translateY(-100%);
       opacity: 0;
@@ -224,14 +238,15 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.85rem 1rem;
+      padding: 0.75rem 1rem;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       color: var(--text-main);
       text-decoration: none;
       font-family: var(--font-code);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
+      min-height: 44px;
     }
 
     .mobile-nav-link:hover { border-color: var(--accent-seal); color: var(--accent-seal); }
@@ -269,7 +284,7 @@
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(2.3rem, 5.2vw, 3.8rem);
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.12;
@@ -278,18 +293,18 @@
     }
 
     .hero-lead {
-      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-size: clamp(0.98rem, 1.8vw, 1.12rem);
       color: var(--text-muted);
-      max-width: 820px;
-      line-height: 1.6;
+      max-width: 800px;
+      line-height: 1.65;
     }
 
     /* Metrics Bar */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
-      margin-bottom: 3.5rem;
+      margin-bottom: 4rem;
     }
 
     .metric-box {
@@ -316,10 +331,27 @@
     }
 
     /* Demos Grid */
+    .section-title-wrap {
+      margin-bottom: 2rem;
+    }
+
+    .section-title-wrap h2 {
+      font-family: var(--font-display);
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 0.35rem;
+    }
+
+    .section-title-wrap p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
     .demos-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
       margin-bottom: 5rem;
     }
 
@@ -327,7 +359,7 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 2rem 1.75rem;
+      padding: 1.75rem 1.5rem;
       text-decoration: none;
       color: inherit;
       display: flex;
@@ -361,16 +393,16 @@
       justify-content: space-between;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1.1rem;
+      margin-bottom: 1rem;
     }
 
     .demo-card__num {
       font-family: var(--font-code);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: var(--card-accent);
       background: rgba(255, 255, 255, 0.05);
-      padding: 0.25rem 0.6rem;
+      padding: 0.25rem 0.55rem;
       border-radius: var(--radius-sm);
       white-space: nowrap;
       flex-shrink: 0;
@@ -378,34 +410,34 @@
 
     .demo-card__tech {
       font-family: var(--font-code);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
       text-align: right;
     }
 
     .demo-card__title {
       font-family: var(--font-display);
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #FFFFFF;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.5rem;
       line-height: 1.25;
     }
 
     .demo-card__desc {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.55;
       margin-bottom: 1.25rem;
     }
 
     .demo-card__variants-badge {
       font-family: var(--font-code);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--card-accent);
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-subtle);
-      padding: 0.25rem 0.5rem;
+      padding: 0.2rem 0.5rem;
       border-radius: var(--radius-sm);
       margin-bottom: 1.25rem;
       display: inline-block;
@@ -415,10 +447,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 1rem;
+      padding-top: 0.9rem;
       border-top: 1px solid var(--border-subtle);
       font-family: var(--font-code);
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--card-accent);
     }
@@ -428,7 +460,7 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 3rem 2.5rem;
+      padding: 3rem 2.25rem;
       margin-bottom: 4rem;
     }
 
@@ -521,21 +553,17 @@
       </a>
 
       <nav class="desktop-nav" aria-label="Navegación">
-        <a href="demos/01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
-        <a href="demos/02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
-        <a href="demos/04-suspension-viewport/index.html" class="nav-pill">04. Viewport IO</a>
-        <a href="demos/07-matchmedia-responsive/index.html" class="nav-pill">07. matchMedia</a>
-        <a href="demos/08-context-cleanup/index.html" class="nav-pill">08. Context</a>
-        <a href="demos/09-texto-revelado-lineas/index.html" class="nav-pill">09. Split Text</a>
-        <a href="demos/10-canvas-secuencia-scroll/index.html" class="nav-pill">10. Canvas</a>
-        <a href="demos/11-benchmark-transform-vs-layout/index.html" class="nav-pill">11. Benchmark</a>
+        <a href="#catalogo" class="nav-link">Catálogo (11)</a>
+        <a href="#criterios" class="nav-link">Criterios WPO</a>
+        <a href="https://brante.dev" class="nav-link" target="_blank" rel="noopener">brante.dev ↗</a>
       </nav>
 
       <div class="header-actions">
         <a href="https://github.com/bbp96/gsap-lab" class="btn-action" target="_blank" rel="noopener">
-          <span>★</span> GitHub
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
         </a>
-        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir catálogo de demos" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -560,10 +588,10 @@
 
   <main class="page-main">
     <section class="hero-header">
-      <div class="hero-badge">Ingeniería Frontend · Rendimiento & Animación Web</div>
+      <div class="hero-badge">Rendimiento & Animación Web · WPO</div>
       <h1 class="hero-title">Patrones de Animación con Foco en Rendimiento</h1>
       <p class="hero-lead">
-        Animar bien no es solo lograr que algo se mueva en pantalla: es garantizar que la animación corra a <strong>60 FPS estables</strong>, sin consumir batería innecesaria en segundo plano, sin fugas de memoria en cambios de ruta y sin romper la experiencia en móviles.
+        Animar bien no es solo lograr que algo se mueva en pantalla: es asegurar que la animación corra a <strong>60 FPS estables</strong>, sin consumir batería innecesaria en segundo plano, sin fugas de memoria al cambiar de vista y sin romper la experiencia en dispositivos móviles.
       </p>
     </section>
 
@@ -587,222 +615,229 @@
       </div>
     </section>
 
-    <!-- Demos Grid -->
-    <section class="demos-grid" aria-label="Catálogo de Demos">
-      
-      <!-- Demo 01 -->
-      <a class="demo-card demo-card--01" href="demos/01-entrada-3d/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 01</span>
-            <span class="demo-card__tech">CustomEase · Eje Y</span>
-          </div>
-          <h2 class="demo-card__title">Entradas 3D con Perspectiva</h2>
-          <p class="demo-card__desc">
-            Transformaciones tridimensionales en el eje Y con perspectiva declarada, anclajes laterales y liberación de VRAM al finalizar la animación.
-          </p>
-          <span class="demo-card__variants-badge">3 variantes interactivas</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
+    <!-- Demos Section -->
+    <section id="catalogo">
+      <div class="section-title-wrap">
+        <h2>Catálogo de Demostraciones</h2>
+        <p>Soluciones prácticas para casos habituales en landing pages y aplicaciones web.</p>
+      </div>
 
-      <!-- Demo 02 -->
-      <a class="demo-card demo-card--02" href="demos/02-parallax-multicapa/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 02</span>
-            <span class="demo-card__tech">Timeline · Scrub</span>
+      <div class="demos-grid" aria-label="Catálogo de Demos">
+        
+        <!-- Demo 01 -->
+        <a class="demo-card demo-card--01" href="demos/01-entrada-3d/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 01</span>
+              <span class="demo-card__tech">CustomEase · Eje Y</span>
+            </div>
+            <h3 class="demo-card__title">Entradas 3D con Perspectiva</h3>
+            <p class="demo-card__desc">
+              Transformaciones en el eje Y con perspectiva declarada, anclajes laterales y liberación de memoria VRAM al finalizar la animación.
+            </p>
+            <span class="demo-card__variants-badge">3 variantes interactivas</span>
           </div>
-          <h2 class="demo-card__title">Parallax con Velocidades Diferenciadas</h2>
-          <p class="demo-card__desc">
-            Profundidad visual mediante una única Timeline unificada con interpolación lineal, evitando múltiples listeners de scroll en el navegador.
-          </p>
-          <span class="demo-card__variants-badge">3 modos de parallax</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
-
-      <!-- Demo 03 -->
-      <a class="demo-card demo-card--03" href="demos/03-loops-desfasados/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 03</span>
-            <span class="demo-card__tech">Sine.inOut · Offsets</span>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
           </div>
-          <h2 class="demo-card__title">Bucles Armónicos Desfasados</h2>
-          <p class="demo-card__desc">
-            Flotación y giros continuos con duraciones no coincidentes por elemento para romper la rigidez visual y simular movimiento orgánico.
-          </p>
-          <span class="demo-card__variants-badge">3 patrones de bucle</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
+        </a>
 
-      <!-- Demo 04 -->
-      <a class="demo-card demo-card--04" href="demos/04-suspension-viewport/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 04</span>
-            <span class="demo-card__tech">IntersectionObserver</span>
+        <!-- Demo 02 -->
+        <a class="demo-card demo-card--02" href="demos/02-parallax-multicapa/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 02</span>
+              <span class="demo-card__tech">Timeline · Scrub</span>
+            </div>
+            <h3 class="demo-card__title">Parallax con Velocidades Diferenciadas</h3>
+            <p class="demo-card__desc">
+              Profundidad visual mediante una única Timeline unificada con interpolación lineal, evitando múltiples listeners de scroll en el navegador.
+            </p>
+            <span class="demo-card__variants-badge">3 modos de parallax</span>
           </div>
-          <h2 class="demo-card__title">Suspensión Fuera del Viewport</h2>
-          <p class="demo-card__desc">
-            Pausa automática de animaciones en bucle cuando salen del campo de visión. Incluye monitor en tiempo real de frames ahorrados a la CPU.
-          </p>
-          <span class="demo-card__variants-badge">Telemetría a 60 FPS</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
-
-      <!-- Demo 05 -->
-      <a class="demo-card demo-card--05" href="demos/05-carga-condicional/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 05</span>
-            <span class="demo-card__tech">rAF Guard · Fallbacks</span>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
           </div>
-          <h2 class="demo-card__title">Carga Condicional y Guard con rAF</h2>
-          <p class="demo-card__desc">
-            Eliminación de setTimeout arbitrarios al cargar librerías externas. Sondeo no-bloqueante frame a frame con degradación elegante.
-          </p>
-          <span class="demo-card__variants-badge">4 escenarios de red</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
+        </a>
 
-      <!-- Demo 06 -->
-      <a class="demo-card demo-card--06" href="demos/06-refresh-lazy-images/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 06</span>
-            <span class="demo-card__tech">Zero CLS · Refresh</span>
+        <!-- Demo 03 -->
+        <a class="demo-card demo-card--03" href="demos/03-loops-desfasados/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 03</span>
+              <span class="demo-card__tech">Sine.inOut · Offsets</span>
+            </div>
+            <h3 class="demo-card__title">Bucles Armónicos Desfasados</h3>
+            <p class="demo-card__desc">
+              Flotación y giros continuos con duraciones no coincidentes por elemento para romper la rigidez visual y simular movimiento orgánico.
+            </p>
+            <span class="demo-card__variants-badge">3 patrones de bucle</span>
           </div>
-          <h2 class="demo-card__title">Recálculo tras Imágenes Diferidas</h2>
-          <p class="demo-card__desc">
-            Estrategia de dos capas para prevenir el descalibre de ScrollTrigger ante lazy loading y acordeones: reserva CSS y recálculo reactivo.
-          </p>
-          <span class="demo-card__variants-badge">3 casos de prueba</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
-
-      <!-- Demo 07 -->
-      <a class="demo-card demo-card--07" href="demos/07-matchmedia-responsive/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 07</span>
-            <span class="demo-card__tech">gsap.matchMedia()</span>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
           </div>
-          <h2 class="demo-card__title">Timelines Responsivas por Breakpoint</h2>
-          <p class="demo-card__desc">
-            Animaciones distintas en desktop vs móvil con reversión automática de estilos inline al redimensionar la ventana o rotar la pantalla.
-          </p>
-          <span class="demo-card__variants-badge">Reversión Automática</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
+        </a>
 
-      <!-- Demo 08 -->
-      <a class="demo-card demo-card--08" href="demos/08-context-cleanup/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 08</span>
-            <span class="demo-card__tech">gsap.context() · SPA</span>
+        <!-- Demo 04 -->
+        <a class="demo-card demo-card--04" href="demos/04-suspension-viewport/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 04</span>
+              <span class="demo-card__tech">IntersectionObserver</span>
+            </div>
+            <h3 class="demo-card__title">Suspensión Fuera del Viewport</h3>
+            <p class="demo-card__desc">
+              Pausa automática de animaciones en bucle cuando salen del campo de visión. Incluye monitor en tiempo real de frames ahorrados a la CPU.
+            </p>
+            <span class="demo-card__variants-badge">Telemetría a 60 FPS</span>
           </div>
-          <h2 class="demo-card__title">Aislamiento y Limpieza de Memoria</h2>
-          <p class="demo-card__desc">
-            Eliminación total de fugas de memoria (memory leaks) en Astro View Transitions, Swup y componentes reactivos al desmontarse del DOM.
-          </p>
-          <span class="demo-card__variants-badge">ctx.revert() Sandbox</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
-
-      <!-- Demo 09 -->
-      <a class="demo-card demo-card--09" href="demos/09-texto-revelado-lineas/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 09</span>
-            <span class="demo-card__tech">Vanilla JS · Split Mask</span>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
           </div>
-          <h2 class="demo-card__title">Texto Revelado sin Plugins de Pago</h2>
-          <p class="demo-card__desc">
-            Alternativa gratuita y ligera al plugin comercial SplitText de GSAP, usando máscaras con overflow: hidden y desglose nativo por palabras o líneas.
-          </p>
-          <span class="demo-card__variants-badge">3 modos editoriales</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
+        </a>
 
-      <!-- Demo 10 -->
-      <a class="demo-card demo-card--10" href="demos/10-canvas-secuencia-scroll/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 10</span>
-            <span class="demo-card__tech">HTML5 Canvas · Scrub</span>
+        <!-- Demo 05 -->
+        <a class="demo-card demo-card--05" href="demos/05-carga-condicional/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 05</span>
+              <span class="demo-card__tech">rAF Guard · Fallbacks</span>
+            </div>
+            <h3 class="demo-card__title">Carga Condicional y Guard con rAF</h3>
+            <p class="demo-card__desc">
+              Eliminación de setTimeout arbitrarios al cargar librerías externas. Sondeo no-bloqueante frame a frame con degradación elegante.
+            </p>
+            <span class="demo-card__variants-badge">4 escenarios de red</span>
           </div>
-          <h2 class="demo-card__title">Secuencia de Frames por Scroll</h2>
-          <p class="demo-card__desc">
-            Scrub cinemático estilo Apple sobre Canvas 2D a 60 FPS fijos, evitando parpadeos de red y saturación de memoria por cambio de imágenes en el DOM.
-          </p>
-          <span class="demo-card__variants-badge">Scrubbing Cinemático</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
-
-      <!-- Demo 11 -->
-      <a class="demo-card demo-card--11" href="demos/11-benchmark-transform-vs-layout/index.html">
-        <div>
-          <div class="demo-card__top">
-            <span class="demo-card__num">DEMO 11</span>
-            <span class="demo-card__tech">Layout Thrashing · FPS</span>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
           </div>
-          <h2 class="demo-card__title">Benchmark: transform vs. top / left</h2>
-          <p class="demo-card__desc">
-            Medición en vivo de la caída de FPS y recálculos de Reflow forzado al animar propiedades de layout en comparación con el Compositor de la GPU.
-          </p>
-          <span class="demo-card__variants-badge">Monitor en Tiempo Real</span>
-        </div>
-        <div class="demo-card__footer">
-          <span>PROBAR DEMO</span>
-          <span>→</span>
-        </div>
-      </a>
+        </a>
 
+        <!-- Demo 06 -->
+        <a class="demo-card demo-card--06" href="demos/06-refresh-lazy-images/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 06</span>
+              <span class="demo-card__tech">Zero CLS · Refresh</span>
+            </div>
+            <h3 class="demo-card__title">Recálculo tras Imágenes Diferidas</h3>
+            <p class="demo-card__desc">
+              Estrategia de dos capas para prevenir el descalibre de ScrollTrigger ante lazy loading y acordeones: reserva CSS y recálculo reactivo.
+            </p>
+            <span class="demo-card__variants-badge">3 casos de prueba</span>
+          </div>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Demo 07 -->
+        <a class="demo-card demo-card--07" href="demos/07-matchmedia-responsive/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 07</span>
+              <span class="demo-card__tech">gsap.matchMedia()</span>
+            </div>
+            <h3 class="demo-card__title">Timelines Responsivas por Breakpoint</h3>
+            <p class="demo-card__desc">
+              Animaciones distintas en desktop vs móvil con reversión automática de estilos inline al redimensionar la ventana o rotar la pantalla.
+            </p>
+            <span class="demo-card__variants-badge">Reversión Automática</span>
+          </div>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Demo 08 -->
+        <a class="demo-card demo-card--08" href="demos/08-context-cleanup/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 08</span>
+              <span class="demo-card__tech">gsap.context() · SPA</span>
+            </div>
+            <h3 class="demo-card__title">Aislamiento y Limpieza de Memoria</h3>
+            <p class="demo-card__desc">
+              Eliminación total de fugas de memoria en Astro View Transitions, Swup y componentes reactivos al desmontarse del DOM.
+            </p>
+            <span class="demo-card__variants-badge">ctx.revert() Sandbox</span>
+          </div>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Demo 09 -->
+        <a class="demo-card demo-card--09" href="demos/09-texto-revelado-lineas/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 09</span>
+              <span class="demo-card__tech">Vanilla JS · Split Mask</span>
+            </div>
+            <h3 class="demo-card__title">Texto Revelado sin Plugins de Pago</h3>
+            <p class="demo-card__desc">
+              Alternativa ligera al plugin comercial SplitText de GSAP, usando máscaras con overflow: hidden y desglose nativo por palabras o líneas.
+            </p>
+            <span class="demo-card__variants-badge">3 modos editoriales</span>
+          </div>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Demo 10 -->
+        <a class="demo-card demo-card--10" href="demos/10-canvas-secuencia-scroll/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 10</span>
+              <span class="demo-card__tech">HTML5 Canvas · Scrub</span>
+            </div>
+            <h3 class="demo-card__title">Secuencia de Frames por Scroll</h3>
+            <p class="demo-card__desc">
+              Scrub cinemático estilo Apple sobre Canvas 2D a 60 FPS fijos, evitando parpadeos de red y saturación de memoria por cambio de imágenes en el DOM.
+            </p>
+            <span class="demo-card__variants-badge">Scrubbing Cinemático</span>
+          </div>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Demo 11 -->
+        <a class="demo-card demo-card--11" href="demos/11-benchmark-transform-vs-layout/index.html">
+          <div>
+            <div class="demo-card__top">
+              <span class="demo-card__num">DEMO 11</span>
+              <span class="demo-card__tech">Layout Thrashing · FPS</span>
+            </div>
+            <h3 class="demo-card__title">Benchmark: transform vs. top / left</h3>
+            <p class="demo-card__desc">
+              Medición en vivo de la caída de FPS y recálculos de Reflow forzado al animar propiedades de layout en comparación con el Compositor de la GPU.
+            </p>
+            <span class="demo-card__variants-badge">Monitor en Tiempo Real</span>
+          </div>
+          <div class="demo-card__footer">
+            <span>PROBAR DEMO</span>
+            <span>→</span>
+          </div>
+        </a>
+
+      </div>
     </section>
 
     <!-- Standards Section -->
-    <section class="standards-box">
+    <section class="standards-box" id="criterios">
       <h2>Criterios Técnicos de Desarrollo</h2>
       <div class="standards-grid">
         <div class="standard-item">
@@ -825,7 +860,7 @@
     </section>
   </main>
 
-  <!-- Senior Footer -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="site-footer__container">
       <div>

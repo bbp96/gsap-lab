@@ -15,7 +15,7 @@ El plugin oficial `SplitText` de GSAP está bloqueado bajo la suscripción de pa
 
 ## 💡 La Solución con Vanilla JS y Máscaras CSS
 
-Un enfoque Senior construye el desglose directamente con JavaScript nativo:
+Este enfoque construye el desglose directamente con JavaScript nativo:
 1. Se divide el texto en segmentos (palabras o líneas).
 2. Cada segmento se envuelve en dos niveles:
    - Contenedor exterior: `<span class="reveal-mask">` con `overflow: hidden` y `display: block` (o `inline-block`).
