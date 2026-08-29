@@ -1,104 +1,102 @@
-# GSAP Performance Lab — Técnicas de Animación Web con Foco en Rendimiento
+# GSAP Performance Lab
 
-Colección de módulos de ingeniería frontend autocontenidos que documentan patrones avanzados de animación con **GSAP 3.12.5** y **ScrollTrigger**, con especial énfasis en **Web Performance Optimization (WPO)**, eliminación de *Layout Shifts* (CLS = 0.000) y conservación de batería en dispositivos móviles.
-
-Cada demo es un archivo HTML independiente: se abre directamente en el navegador sin herramientas de *build* ni dependencias locales.
-
----
-
-## 🎯 Por Qué Existe Este Repositorio
-
-La mayoría de los tutoriales de animación web se limitan a mostrar cómo lograr un efecto visual sin considerar su impacto colateral:
-- Animaciones en bucle que continúan consumiendo ciclos de GPU y batería cuando la sección ya no está visible.
-- Triggers de `ScrollTrigger` que se descalibran cientos de píxeles al cargar imágenes con `loading="lazy"`.
-- Caídas de frames (*jank*) en dispositivos móviles por animar propiedades que disparan reflows del DOM (`top`, `left`, `margin`).
-
-Este laboratorio documenta la solución arquitectónica para cada uno de estos escenarios: **la técnica y su costo de rendimiento.**
+> **Autor:** Benjamín Brante — Desarrollador Web (Frontend, WordPress & WPO)  
+> **Sitio Web:** [brante.dev](https://brante.dev) · **LinkedIn:** [benjaminbrante](https://linkedin.com/in/benjaminbrante)  
+> **Stack:** GSAP 3.12.5 · ScrollTrigger · CustomEase · JavaScript ES6 Vanilla · CSS3 Grid/Flexbox
 
 ---
 
-## 📦 Catálogo de Demos
+## 🎯 Por qué existe este repositorio
 
-| # | Módulo | Técnica Arquitectónica | Foco de Rendimiento (WPO) |
-|---|---|---|---|
-| **01** | [Entrada 3D con ScrollTrigger](demos/01-entrada-3d/) | `rotationY` con perspectiva, `transformOrigin` lateral y curvas Bézier con *overshoot* en `CustomEase`. | Liberación de VRAM (`will-change: auto` en `onComplete`). |
-| **02** | [Parallax Multicapa](demos/02-parallax-multicapa/) | Timeline única centralizada, desplazamiento diferencial multi-plano y `scrub: 1.5` lineal (`ease: 'none'`). | Eliminación de listeners redundantes en el *Main Thread*. |
-| **03** | [Bucles Desfasados](demos/03-loops-desfasados/) | Tres oscilaciones simultáneas por nodo ($Y$, rotación, escala) con offsets matemáticos no coincidentes. | Movimiento orgánico sin fatiga visual ni recálculo de layout. |
-| **04** | [Suspensión Fuera del Viewport](demos/04-suspension-viewport/) | `IntersectionObserver` con margen preventivo (`rootMargin: 10% 0px`) y control de estado `play()` / `pause()`. | **0% CPU** y ahorro de batería cuando la sección no es visible. |
-| **05** | [Carga Condicional & Guard](demos/05-carga-condicional/) | Verificación de dependencias frame a frame mediante `requestAnimationFrame` sin `setTimeout` arbitrario. | Resolución en el frame exacto (0 ms latencia residual). |
-| **06** | [Recálculo con Imágenes Diferidas](demos/06-refresh-lazy-images/) | Reserva dimensional en CSS (`aspect-ratio: 16/9`) + red de seguridad con `ScrollTrigger.refresh()`. | **Zero Cumulative Layout Shift (CLS = 0.000)** garantizado. |
+En muchos proyectos web donde se usan animaciones (especialmente en sitios corporativos con WordPress o Astro), el problema suele ser el mismo: las animaciones se ven bonitas en una MacBook de desarrollo, pero en un teléfono móvil de gama media la página da tirones, el scroll se pega o la batería se drena rápido.
+
+Este repositorio no es un muestrario de efectos visuales sin sentido: es una **colección de soluciones técnicas y patrones de arquitectura** que he aplicado en proyectos de producción para garantizar que las animaciones corran a **60 FPS estables**, sin recalcular el DOM innecesariamente y respetando el consumo de recursos del usuario.
 
 ---
 
-## 🛠️ Estructura del Repositorio
+## 📂 Directorio de Demos y Variantes Técnicas
 
-```
-gsap-lab/
-├── .gitignore
-├── LICENSE                  # Licencia MIT (Benjamín Brante)
-├── README.md                # Documentación maestra
-├── index.html               # Portal Showcase y catálogo interactivo
-└── demos/
-    ├── 01-entrada-3d/
-    │   ├── index.html
-    │   └── README.md        # Especificación técnica, curvas y WPO
-    ├── 02-parallax-multicapa/
-    │   ├── index.html
-    │   └── README.md
-    ├── 03-loops-desfasados/
-    │   ├── index.html
-    │   └── README.md
-    ├── 04-suspension-viewport/
-    │   ├── index.html
-    │   └── README.md
-    ├── 05-carga-condicional/
-    │   ├── index.html
-    │   └── README.md
-    └── 06-refresh-lazy-images/
-        ├── index.html
-        └── README.md
-```
+Cada carpeta contiene un archivo `index.html` autónomo (sin dependencias de build ni bundlers) y su respectivo `README.md` técnico con el desglose del código.
+
+### [01. Entradas 3D con ScrollTrigger y CustomEase](demos/01-entrada-3d/)
+- **El problema:** Los fade-in clásicos se sienten planos. La rotación 3D aporta peso, pero si no declaras perspectiva se ve deforme, y si dejas `will-change` pegado en CSS saturas la memoria VRAM del teléfono.
+- **Variantes incluidas:**
+  1. *Flip Lateral Asimétrico* (pivote en el borde con rotación en Y y rebote elástico).
+  2. *Proyección de Profundidad en Eje Z* (escala + perspectiva frontal).
+  3. *Desdoble Origami Diagonal* (combinación de Skew y rotación).
+- **Criterio WPO:** Activación dinámica de `will-change` por JavaScript y liberación inmediata a `auto` en el callback `onComplete`.
 
 ---
 
-## 🚀 Cómo Ejecutarlo
-
-1. Clonar el repositorio:
-```bash
-git clone https://github.com/bbp96/gsap-lab.git
-cd gsap-lab
-```
-
-2. Abrir `index.html` directamente con doble clic en tu navegador, o servirlo localmente:
-```bash
-# Con Python
-python -m http.server 8000
-
-# Con Node (npx)
-npx serve .
-```
+### [02. Parallax Multicapa con Scrub](demos/02-parallax-multicapa/)
+- **El problema:** Poner un listener de `window.addEventListener('scroll')` por cada capa flotante satura el hilo principal del navegador.
+- **Modos incluidos:**
+  1. *Profundidad Clásica Multi-Plano* (deltas de velocidad escalonados: -160px, -340px, -580px).
+  2. *Movimiento Opuesto (Split)* (capas laterales en contracorriente respecto al centro).
+  3. *Parallax con Rotación y Escala Sincronizada al Scroll*.
+- **Criterio WPO:** Una sola Timeline maestra sincronizada con `scrub: 1.5` y `ease: 'none'`, ejecutando un único cálculo compuesto por frame.
 
 ---
 
-## ⚡ Principios de Ingeniería Aplicados
-
-1. **GPU Compositing Exclusivo:** Todo movimiento se delega a `transform: matrix3d(...)` y `opacity`. Cero mutaciones de propiedades geométricas de layout (`width`, `height`, `top`).
-2. **Gestión Activa de VRAM:** Declaración transitoria de `will-change` durante el ciclo de animación y liberación inmediata al finalizar.
-3. **Zero Idle Overhead:** Pausa automática de bucles infinitos fuera del viewport mediante `IntersectionObserver`.
-4. **Accesibilidad Universal (WCAG 2.1 AA):** Verificación estricta de `prefers-reduced-motion` en todos los módulos para usuarios con sensibilidad vestibular.
-5. **Alcance Aislado (Clean Scope):** Módulos encapsulados en IIFE estrictos sin contaminar el objeto global `window`.
+### [03. Bucles Armónicos Desfasados](demos/03-loops-desfasados/)
+- **El problema:** Cuando varios elementos flotan con la misma duración exacta (`2.0s`), el ojo humano detecta el patrón en 2 segundos y la animación se siente rígida y mecánica.
+- **Patrones incluidos:**
+  1. *Flotación Orgánica Multi-Eje* (Y + Rotación + Escala desfasados con números primos).
+  2. *Efecto Onda en Cascada* (desfase progresivo por índice).
+  3. *Pulso y Respiración Alternada* (giros y escala con polaridad opuesta).
+- **Criterio WPO:** Solo se animan propiedades de composición (`transform`).
 
 ---
 
-## 👨‍💻 Autor
+### [04. Suspensión de Animaciones Fuera del Viewport](demos/04-suspension-viewport/)
+- **El problema:** Una animación en bucle infinito que sigue corriendo cuando el usuario ya scrolleó hacia otra sección es un desperdicio de batería y ciclos de GPU.
+- **Características:**
+  - Control de pausa y reanudación automática en 0 ms con `IntersectionObserver`.
+  - Margen preventivo `rootMargin: '10% 0px'` para que la animación despierte una fracción de segundo antes de cruzar la pantalla.
+  - Telemetría en tiempo real a 60 FPS con contador de frames ahorrados y tasa de eficiencia de CPU.
 
-**Benjamín Brante** — Desarrollador Web · Arquitectura Frontend & WPO  
-- Sitio Web: [brante.dev](https://brante.dev)  
-- LinkedIn: [linkedin.com/in/benjaminbrante](https://linkedin.com/in/benjaminbrante)  
-- GitHub: [@bbp96](https://github.com/bbp96)
+---
+
+### [05. Carga Condicional y Guard con rAF](demos/05-carga-condicional/)
+- **El problema:** El uso de `setTimeout(fn, 500)` para esperar a que cargue una librería externa en WordPress es un antipatrón. Si el usuario tiene conexión lenta falla (`TypeError: gsap is not defined`), y si tiene conexión rápida pierde medio segundo de experiencia.
+- **Sandbox con 4 escenarios simulados:**
+  1. *Fast 3G (300 ms)* — Sondeo frame a frame hasta resolución rápida.
+  2. *Slow 3G (1200 ms)* — Manejo de latencia real sin bloquear la interfaz.
+  3. *Caché Local (0 ms)* — Ejecución inmediata en Frame #1.
+  4. *Fallo 404 / Timeout Defensivo* — Límite seguro de 3 segundos y activación de degradación elegante (Fallback CSS).
+
+---
+
+### [06. Recálculo tras Imágenes Diferidas y Zero CLS](demos/06-refresh-lazy-images/)
+- **El problema:** Al combinar `loading="lazy"` o acordeones con `ScrollTrigger`, cuando las imágenes descargan empujan el contenido y descalibran los puntos de activación (`start`/`end`).
+- **Solución en 2 capas:**
+  1. *Capa Preventiva (CSS):* Reserva dimensional con `aspect-ratio: 16/9` para lograr un Cumulative Layout Shift (CLS) exacto de 0.000.
+  2. *Capa Reactiva (JS):* Suscripción al evento `load` con `{ once: true }` y sincronización en mutaciones del DOM mediante `ScrollTrigger.refresh()`.
+
+---
+
+## 🛠️ Cómo ejecutar este repositorio localmente
+
+No necesitas Node.js, Webpack ni dependencias externas:
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/bbp96/gsap-lab.git
+   ```
+2. Abre `index.html` directamente en tu navegador o usa cualquier servidor local estático (como Live Server en VS Code o `npx serve .`).
+
+---
+
+## 📋 Principios de Calidad Frontend Aplicados
+
+- **GPU First:** Solo se animan `transform` y `opacity`. Cero cambios a propiedades que provoquen *layout thrashing* (`top`, `left`, `margin`, `width`, `height`).
+- **Gestión de Memoria:** Limpieza activa de `will-change` en `onComplete` para no saturar la memoria gráfica en móviles.
+- **Accesibilidad (a11y):** Verificación estricta de `prefers-reduced-motion` en cada módulo para desactivar animaciones si el usuario lo solicita en su sistema operativo.
+- **Zero CLS:** Cumplimiento de métricas Core Web Vitals reservando espacios antes de la carga de assets.
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Código bajo licencia MIT. Desarrollado por **Benjamín Brante**.  
+Puedes usar libremente estos patrones en tus propios proyectos web.

@@ -3,28 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01 — Entrada 3D & CustomEase | GSAP Performance Lab</title>
+  <title>01 — Entradas 3D con ScrollTrigger y CustomEase | GSAP Lab</title>
   <style>
     :root {
-      --bg-base: #08090C;
-      --bg-surface: #0E1117;
-      --bg-surface-elevated: #151922;
-      --bg-surface-glass: rgba(14, 17, 23, 0.85);
-      --border-subtle: rgba(255, 255, 255, 0.07);
-      --border-strong: rgba(255, 255, 255, 0.14);
+      --bg-base: #0B0C10;
+      --bg-surface: #12141A;
+      --bg-surface-elevated: #181B24;
+      --border-subtle: #232734;
+      --border-strong: #32384A;
       --text-main: #FFFFFF;
-      --text-muted: #8E96A4;
-      --text-dim: #545C6A;
-      --accent-coral: #E05A3E;
+      --text-muted: #9BA3B5;
+      --text-dim: #5E6678;
+      --accent-primary: #E05A3E; /* Naranja/Coral sobrio */
       --accent-emerald: #10B981;
       --accent-cyan: #06B6D4;
       --accent-violet: #8B5CF6;
       --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       --font-code: 'SF Mono', Monaco, Consolas, 'Liberation Mono', Menlo, monospace;
       --radius-sm: 6px;
-      --radius-md: 12px;
-      --radius-lg: 18px;
-      --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,6 +40,7 @@
       flex-direction: column;
     }
 
+    /* Architectural Clean Grid */
     body::before {
       content: '';
       position: fixed;
@@ -48,21 +48,21 @@
       background-image: 
         linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-size: 32px 32px;
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Header & Navigation */
+    /* Header */
     .site-header {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       z-index: 1000;
-      background: var(--bg-surface-glass);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(11, 12, 16, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-subtle);
     }
 
@@ -86,7 +86,7 @@
     .brand-symbol {
       width: 28px;
       height: 28px;
-      background: linear-gradient(135deg, var(--accent-coral), var(--accent-violet));
+      background: var(--accent-primary);
       border-radius: var(--radius-sm);
       display: grid;
       place-items: center;
@@ -108,20 +108,19 @@
       font-size: 0.7rem;
       padding: 0.15rem 0.5rem;
       border-radius: 4px;
-      background: rgba(224, 90, 62, 0.15);
-      border: 1px solid rgba(224, 90, 62, 0.35);
-      color: var(--accent-coral);
+      background: rgba(224, 90, 62, 0.12);
+      border: 1px solid rgba(224, 90, 62, 0.3);
+      color: var(--accent-primary);
+      white-space: nowrap;
     }
 
     .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
-    @media (max-width: 900px) {
-      .desktop-nav { display: none; }
-    }
+    @media (max-width: 900px) { .desktop-nav { display: none; } }
 
     .nav-pill {
       font-family: var(--font-code);
@@ -131,18 +130,14 @@
       color: var(--text-muted);
       text-decoration: none;
       transition: all 0.2s ease;
-      border: 1px solid transparent;
+      white-space: nowrap;
     }
 
-    .nav-pill:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
+    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
     .nav-pill--active {
-      color: var(--accent-coral);
+      color: var(--accent-primary);
       background: rgba(224, 90, 62, 0.1);
-      border-color: rgba(224, 90, 62, 0.25);
+      border: 1px solid rgba(224, 90, 62, 0.25);
     }
 
     .header-actions {
@@ -164,13 +159,14 @@
       cursor: pointer;
       transition: all 0.2s ease;
       border: 1px solid var(--border-subtle);
-      background: var(--bg-surface-elevated);
+      background: var(--bg-surface);
       color: var(--text-main);
+      white-space: nowrap;
     }
 
     .btn-action:hover {
-      border-color: var(--accent-coral);
-      background: rgba(224, 90, 62, 0.15);
+      border-color: var(--accent-primary);
+      background: var(--bg-surface-elevated);
       transform: translateY(-1px);
     }
 
@@ -181,16 +177,14 @@
       gap: 5px;
       width: 36px;
       height: 36px;
-      background: var(--bg-surface-elevated);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       cursor: pointer;
       padding: 8px;
     }
 
-    @media (max-width: 900px) {
-      .btn-hamburger { display: flex; }
-    }
+    @media (max-width: 900px) { .btn-hamburger { display: flex; } }
 
     .btn-hamburger span {
       display: block;
@@ -212,36 +206,24 @@
       left: 0;
       width: 100%;
       height: calc(100vh - 57px);
-      background: rgba(8, 9, 12, 0.98);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      background: rgba(11, 12, 16, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
       overflow-y: auto;
       transform: translateY(-100%);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.35s var(--transition-smooth);
+      transition: all 0.35s var(--ease-out);
       z-index: 999;
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .mobile-drawer.is-open {
-      transform: translateY(0);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .mobile-drawer__section-title {
-      font-family: var(--font-code);
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
-    }
+    .mobile-drawer.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-drawer__title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
 
     .mobile-nav-link {
       display: flex;
@@ -254,15 +236,10 @@
       color: var(--text-main);
       text-decoration: none;
       font-family: var(--font-code);
-      font-size: 0.85rem;
-      transition: all 0.2s ease;
+      font-size: 0.82rem;
     }
 
-    .mobile-nav-link:hover, .mobile-nav-link--active {
-      border-color: var(--accent-coral);
-      background: var(--bg-surface-elevated);
-      color: var(--accent-coral);
-    }
+    .mobile-nav-link--active { border-color: var(--accent-primary); color: var(--accent-primary); }
 
     /* Page Layout */
     .page-main {
@@ -275,12 +252,9 @@
       z-index: 1;
     }
 
-    /* Hero Section */
-    .hero-header {
-      margin-bottom: 3.5rem;
-    }
+    .hero-header { margin-bottom: 3rem; }
 
-    .hero-eyebrow {
+    .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
@@ -288,169 +262,132 @@
       font-size: 0.72rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent-coral);
+      letter-spacing: 0.08em;
+      color: var(--accent-primary);
       background: rgba(224, 90, 62, 0.08);
-      border: 1px solid rgba(224, 90, 62, 0.2);
+      border: 1px solid rgba(224, 90, 62, 0.25);
       padding: 0.3rem 0.75rem;
       border-radius: 999px;
       margin-bottom: 1.25rem;
     }
 
     .hero-title {
-      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
       font-weight: 800;
-      letter-spacing: -0.035em;
-      line-height: 1.12;
-      margin-bottom: 1.25rem;
-    }
-
-    .hero-title span {
-      background: linear-gradient(135deg, #FFFFFF 40%, var(--accent-coral) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      color: #FFFFFF;
     }
 
     .hero-lead {
       font-size: clamp(1rem, 2vw, 1.15rem);
       color: var(--text-muted);
       max-width: 740px;
-      line-height: 1.65;
+      line-height: 1.6;
     }
 
-    /* Interactive Curve Controller */
-    .control-panel {
+    /* Variant Selector Switcher */
+    .variant-selector {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 1.75rem;
+      padding: 1.5rem;
       margin-bottom: 3rem;
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 2rem;
+    }
+
+    .variant-selector__header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-    }
-
-    @media (max-width: 800px) {
-      .control-panel { grid-template-columns: 1fr; }
-    }
-
-    .control-inputs {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .slider-row {
-      display: flex;
-      flex-direction: column;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
       gap: 0.5rem;
     }
 
-    .slider-header {
-      display: flex;
-      justify-content: space-between;
+    .variant-selector__title {
       font-family: var(--font-code);
       font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
     }
 
-    .range-input {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 6px;
+    .variant-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .btn-variant {
       background: var(--bg-surface-elevated);
-      border-radius: 3px;
-      outline: none;
       border: 1px solid var(--border-subtle);
-    }
-
-    .range-input::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--accent-coral);
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(224, 90, 62, 0.6);
-    }
-
-    .curve-display {
-      background: #090B10;
-      border: 1px solid var(--border-strong);
       border-radius: var(--radius-md);
-      padding: 1.25rem;
+      padding: 0.85rem 1rem;
+      color: var(--text-main);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .btn-variant:hover { border-color: var(--accent-primary); }
+    .btn-variant.is-active {
+      border-color: var(--accent-primary);
+      background: rgba(224, 90, 62, 0.1);
+    }
+
+    .btn-variant__name { font-family: var(--font-code); font-size: 0.82rem; font-weight: 700; color: #fff; }
+    .btn-variant__desc { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Scene Arena */
+    .scene-arena {
+      min-height: 480px;
+      display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .curve-display svg {
-      width: 100%;
-      max-width: 240px;
-      height: 110px;
-    }
-
-    /* 3D Scene Grid */
-    .scene-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin-bottom: 4rem;
+      margin-bottom: 3.5rem;
       perspective: 1200px;
-    }
-
-    .card-3d {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 3rem 1.5rem;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.75rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .demo-card-3d {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
       border-radius: var(--radius-md);
-      padding: 2.2rem 1.8rem;
+      padding: 2rem 1.6rem;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
       will-change: transform, opacity;
       transform-style: preserve-3d;
-      transition: border-color 0.3s ease;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
     }
 
-    .card-3d:hover {
-      border-color: rgba(224, 90, 62, 0.4);
-    }
-
-    .card-3d::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--accent-coral), transparent);
-    }
-
-    .card-3d__tag {
+    .demo-card-3d__tag {
       font-family: var(--font-code);
-      font-size: 0.72rem;
-      color: var(--accent-coral);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent-primary);
       letter-spacing: 0.08em;
-      margin-bottom: 0.85rem;
-      display: inline-block;
-      font-weight: 700;
-    }
-
-    .card-3d__title {
-      font-size: 1.25rem;
-      font-weight: 700;
       margin-bottom: 0.75rem;
+      display: inline-block;
     }
 
-    .card-3d__desc {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 1.25rem;
-    }
+    .demo-card-3d__title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.6rem; }
+    .demo-card-3d__desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 1.25rem; }
 
-    .code-pill {
+    .demo-card-3d__code {
       background: #090B10;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
@@ -460,6 +397,18 @@
       color: var(--accent-cyan);
       overflow-x: auto;
     }
+
+    /* Explanation Breakdown */
+    .explanation-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .explanation-box h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 1rem; color: #fff; }
+    .explanation-box p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1rem; }
 
     /* Footer */
     .site-footer {
@@ -487,24 +436,9 @@
       margin-bottom: 1rem;
     }
 
-    .footer-links-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .footer-links-list a {
-      font-family: var(--font-code);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .footer-links-list a:hover {
-      color: var(--accent-coral);
-    }
+    .footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links-list a { font-family: var(--font-code); font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+    .footer-links-list a:hover { color: var(--accent-primary); }
 
     .footer-bottom {
       max-width: 1200px;
@@ -523,7 +457,7 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Site Header -->
   <header class="site-header">
     <div class="site-header__container">
       <a href="../../index.html" class="site-header__brand">
@@ -532,7 +466,7 @@
         <span class="brand-badge">DEMO 01/06</span>
       </a>
 
-      <nav class="desktop-nav" aria-label="Navegación de demos">
+      <nav class="desktop-nav" aria-label="Navegación">
         <a href="index.html" class="nav-pill nav-pill--active">01. 3D Entry</a>
         <a href="../02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
         <a href="../03-loops-desfasados/index.html" class="nav-pill">03. Loops</a>
@@ -542,13 +476,9 @@
       </nav>
 
       <div class="header-actions">
-        <button id="btnReplay" class="btn-action" title="Re-ejecutar animación">
-          <span>↺</span> Replay
-        </button>
-        <a href="README.md" class="btn-action" target="_blank" rel="noopener">
-          <span>//</span> README
-        </a>
-        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú de navegación" aria-expanded="false">
+        <button id="btnReplay" class="btn-action"><span>↺</span> Replay</button>
+        <a href="README.md" class="btn-action" target="_blank" rel="noopener"><span>//</span> README</a>
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -557,95 +487,87 @@
 
   <!-- Mobile Drawer -->
   <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
-    <span class="mobile-drawer__section-title">Directorio de Laboratorio</span>
-    <a href="index.html" class="mobile-nav-link mobile-nav-link--active">
-      <span>01. Entrada 3D & CustomEase</span> <span>→</span>
-    </a>
-    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link">
-      <span>02. Parallax Multicapa & Scrub</span> <span>→</span>
-    </a>
-    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link">
-      <span>03. Bucles Armónicos Desfasados</span> <span>→</span>
-    </a>
-    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link">
-      <span>04. Suspensión Viewport (CPU Saver)</span> <span>→</span>
-    </a>
-    <a href="../05-carga-condicional/index.html" class="mobile-nav-link">
-      <span>05. Carga Condicional & Guard rAF</span> <span>→</span>
-    </a>
-    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link">
-      <span>06. Recálculo con Imágenes & Zero CLS</span> <span>→</span>
-    </a>
-    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-coral);">
-      <span>← Volver al Portal Principal</span>
-    </a>
+    <span class="mobile-drawer__title">Demos Técnicas</span>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>01. Entradas 3D</span> <span>→</span></a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa</span> <span>→</span></a>
+    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos</span> <span>→</span></a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport</span> <span>→</span></a>
+    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional</span> <span>→</span></a>
+    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link"><span>06. Recálculo Imágenes</span> <span>→</span></a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-primary);"><span>← Volver al Hub Principal</span></a>
   </div>
 
-  <!-- Main Content -->
   <main class="page-main">
     <section class="hero-header">
-      <div class="hero-eyebrow">ScrollTrigger & 3D Matrix Compositing</div>
-      <h1 class="hero-title">Entrada 3D con <span>CustomEase & Overshoot</span></h1>
+      <div class="hero-badge">Técnica: Transformaciones 3D & Easing Personalizado</div>
+      <h1 class="hero-title">Entradas 3D con ScrollTrigger y CustomEase</h1>
       <p class="hero-lead">
-        Rotación en el eje Y con perspectiva focal declarada (`transformPerspective: 900`), punto de pivote asimétrico y curva Bézier elástica personalizada.
+        Un fade-in estándar se siente plano. Usar rotación tridimensional en el eje Y o en profundidad añade peso visual, pero exige declarar perspectiva y liberar la memoria VRAM al terminar para que el teléfono no se pegue.
       </p>
     </section>
 
-    <!-- Interactive Live Controller -->
-    <section class="control-panel" aria-label="Controlador interactivo de curva Bézier">
-      <div class="control-inputs">
-        <div class="slider-row">
-          <div class="slider-header">
-            <span>Factor de Rebote Elástico (Overshoot)</span>
-            <span id="overshootValue" style="color: var(--accent-coral); font-weight: 700;">1.18x (18%)</span>
-          </div>
-          <input type="range" min="1.0" max="1.35" step="0.01" value="1.18" class="range-input" id="overshootSlider">
-        </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted);">
-          Mueve el control para recalibrar en vivo la curva <code>CustomEase</code> y disparar la animación tridimensional con la nueva física.
-        </p>
+    <!-- 3 Interactive Examples Switcher -->
+    <section class="variant-selector" aria-label="Selector de Variantes 3D">
+      <div class="variant-selector__header">
+        <span class="variant-selector__title">Elige una variante técnica para probar:</span>
       </div>
-
-      <div class="curve-display">
-        <svg viewBox="0 0 200 90" fill="none" id="bezierSvg">
-          <line x1="10" y1="80" x2="190" y2="80" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
-          <line x1="10" y1="20" x2="190" y2="20" stroke="rgba(255,255,255,0.15)" stroke-dasharray="2 2" />
-          <path id="svgCurvePath" d="M 10 80 C 70 -5, 120 20, 190 20" stroke="#E05A3E" stroke-width="2.5" />
-        </svg>
-        <span style="font-family: var(--font-code); font-size: 0.68rem; color: var(--text-dim); margin-top: 0.5rem;">
-          Curva Bézier CustomEase: M0,0 C0.34,{overshoot} 0.6,1 1,1
-        </span>
+      <div class="variant-buttons">
+        <button class="btn-variant is-active" data-variant="flip">
+          <span class="btn-variant__name">1. Flip Lateral Asimétrico</span>
+          <span class="btn-variant__desc">Pivote en los bordes con rotación en Y y rebote elástico</span>
+        </button>
+        <button class="btn-variant" data-variant="depth">
+          <span class="btn-variant__name">2. Proyección de Profundidad</span>
+          <span class="btn-variant__desc">Entrada desde el fondo en eje Z con escala y overshoot</span>
+        </button>
+        <button class="btn-variant" data-variant="fold">
+          <span class="btn-variant__name">3. Desdoble Origami Diagonal</span>
+          <span class="btn-variant__desc">Combinación de SkewX, rotación y desdoblamiento</span>
+        </button>
       </div>
     </section>
 
-    <!-- 3D Scene Grid -->
-    <section class="scene-grid" id="cardsContainer">
-      <article class="card-3d" data-direction="left">
-        <span class="card-3d__tag">TÉCNICA 01</span>
-        <h2 class="card-3d__title">Perspectiva Focal en Eje Y</h2>
-        <p class="card-3d__desc">
-          La rotación en Y requiere <code>transformPerspective</code> para proyectar volumen espacial real y evitar que el navegador aplane los polígonos.
-        </p>
-        <pre class="code-pill">rotationY: 32, transformPerspective: 900</pre>
-      </article>
+    <!-- Scene Arena -->
+    <section class="scene-arena">
+      <div class="cards-grid" id="cardsGrid">
+        <article class="demo-card-3d" data-direction="left">
+          <span class="demo-card-3d__tag">PASO 01</span>
+          <h2 class="demo-card-3d__title">Perspectiva Declarada</h2>
+          <p class="demo-card-3d__desc">
+            Sin <code>transformPerspective</code>, la rotación en Y aplasta la tarjeta como si fuera 2D. Declarar 900px fija la distancia del ojo a la pantalla.
+          </p>
+          <pre class="demo-card-3d__code">transformPerspective: 900</pre>
+        </article>
 
-      <article class="card-3d" data-direction="right">
-        <span class="card-3d__tag">TÉCNICA 02</span>
-        <h2 class="card-3d__title">Pivote Lateral (transformOrigin)</h2>
-        <p class="card-3d__desc">
-          El anclaje del eje acompaña la dirección de entrada: <code>left center</code> para elementos izquierdos y <code>right center</code> para derechos.
-        </p>
-        <pre class="code-pill">transformOrigin: 'right center', skewX: -6</pre>
-      </article>
+        <article class="demo-card-3d" data-direction="right">
+          <span class="demo-card-3d__tag">PASO 02</span>
+          <h2 class="demo-card-3d__title">Pivote por Lado</h2>
+          <p class="demo-card-3d__desc">
+            La tarjeta que entra por la izquierda pivota desde su borde izquierdo (<code>left center</code>). Eso hace que el movimiento se sienta natural.
+          </p>
+          <pre class="demo-card-3d__code">transformOrigin: 'left center'</pre>
+        </article>
 
-      <article class="card-3d" data-direction="left">
-        <span class="card-3d__tag">TÉCNICA 03</span>
-        <h2 class="card-3d__title">Liberación Activa de VRAM</h2>
-        <p class="card-3d__desc">
-          Declaración transitoria de <code>will-change: transform</code> durante el tween y restauración automática a <code>auto</code> en <code>onComplete</code>.
-        </p>
-        <pre class="code-pill">onComplete: () => el.style.willChange = 'auto'</pre>
-      </article>
+        <article class="demo-card-3d" data-direction="left">
+          <span class="demo-card-3d__tag">PASO 03</span>
+          <h2 class="demo-card-3d__title">Liberar will-change</h2>
+          <p class="demo-card-3d__desc">
+            En <code>onComplete</code> pasamos <code>willChange = 'auto'</code> para que la GPU libere la capa de composición y no sature la memoria.
+          </p>
+          <pre class="demo-card-3d__code">onComplete: () => el.style.willChange = 'auto'</pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- Developer Notes -->
+    <section class="explanation-box">
+      <h2>Cómo lo aplico en producción</h2>
+      <p>
+        En proyectos reales con WordPress o Astro, el mayor error con animaciones 3D es dejar <code>will-change: transform</code> fijo en el archivo CSS. Eso le dice al navegador que reserve una capa de textura de GPU por cada tarjeta para siempre. Con 3 tarjetas no pasa nada; con 30 productos en una tienda online, un teléfono de gama media se queda sin memoria VRAM y la navegación empieza a dar tirones.
+      </p>
+      <p>
+        La solución limpia es declararlo por JavaScript solo cuando la animación arranca y retirarlo inmediatamente en el callback <code>onComplete</code>.
+      </p>
     </section>
   </main>
 
@@ -668,7 +590,7 @@
         </ul>
       </div>
       <div>
-        <div class="footer-col__title">Contacto & Redes</div>
+        <div class="footer-col__title">Contacto</div>
         <ul class="footer-links-list">
           <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
           <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
@@ -682,19 +604,13 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
   <script>
-    /**
-     * CONTEXTO: Entrada 3D con CustomEase y Slider Interactivo
-     * AUTOR: Benjamín Brante (Arquitecto Frontend)
-     */
     (() => {
       'use strict';
 
-      // Mobile Menu Handler
       const btnMenuToggle = document.getElementById('btnMenuToggle');
       const mobileDrawer = document.getElementById('mobileDrawer');
       if (btnMenuToggle && mobileDrawer) {
@@ -709,67 +625,86 @@
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       gsap.registerPlugin(ScrollTrigger, CustomEase);
+      CustomEase.create('asentado', 'M0,0 C0.34,1.18 0.6,1 1,1');
 
-      const cards = document.querySelectorAll('.card-3d');
-      const slider = document.getElementById('overshootSlider');
-      const overshootValue = document.getElementById('overshootValue');
-      const svgCurvePath = document.getElementById('svgCurvePath');
+      const cards = document.querySelectorAll('.demo-card-3d');
+      const variantBtns = document.querySelectorAll('.btn-variant');
       const btnReplay = document.getElementById('btnReplay');
+      let currentVariant = 'flip';
 
-      let currentEaseName = 'asentadoCustom';
-
-      const updateCurve = (val) => {
-        const factor = parseFloat(val);
-        const percent = Math.round((factor - 1) * 100);
-        overshootValue.textContent = `${factor.toFixed(2)}x (${percent}%)`;
-
-        // SVG Y calculation for curve preview
-        const peakY = 20 - (factor - 1.0) * 100;
-        svgCurvePath.setAttribute('d', `M 10 80 C 70 ${peakY}, 120 20, 190 20`);
-
-        // Create CustomEase
-        CustomEase.create(currentEaseName, `M0,0 C0.34,${factor} 0.6,1 1,1`);
-      };
-
-      const animateCards = () => {
-        cards.forEach((card) => {
+      const runAnimation = (variant) => {
+        cards.forEach((card, index) => {
           const isLeft = card.dataset.direction === 'left';
           card.style.willChange = 'transform, opacity';
 
-          gsap.fromTo(card, {
-            x: isLeft ? -110 : 110,
-            rotationY: isLeft ? 30 : -30,
-            skewX: isLeft ? 5 : -5,
-            scale: 0.94,
-            autoAlpha: 0,
-            transformPerspective: 900,
-            transformOrigin: isLeft ? 'left center' : 'right center'
-          }, {
-            x: 0,
-            rotationY: 0,
-            skewX: 0,
-            scale: 1,
-            autoAlpha: 1,
-            duration: 1.1,
-            ease: currentEaseName,
-            onComplete: () => {
-              card.style.willChange = 'auto';
-            }
-          });
+          if (variant === 'flip') {
+            // Variante 1: Flip lateral
+            gsap.fromTo(card, {
+              x: isLeft ? -90 : 90,
+              rotationY: isLeft ? 32 : -32,
+              skewX: isLeft ? 5 : -5,
+              scale: 0.94,
+              autoAlpha: 0,
+              transformPerspective: 900,
+              transformOrigin: isLeft ? 'left center' : 'right center'
+            }, {
+              x: 0, rotationY: 0, skewX: 0, scale: 1, autoAlpha: 1,
+              duration: 1.05,
+              delay: index * 0.1,
+              ease: 'asentado',
+              onComplete: () => { card.style.willChange = 'auto'; }
+            });
+          } else if (variant === 'depth') {
+            // Variante 2: Profundidad frontal eje Z
+            gsap.fromTo(card, {
+              z: -300,
+              rotationX: 25,
+              scale: 0.75,
+              autoAlpha: 0,
+              transformPerspective: 800,
+              transformOrigin: 'center bottom'
+            }, {
+              z: 0, rotationX: 0, scale: 1, autoAlpha: 1,
+              duration: 1.15,
+              delay: index * 0.12,
+              ease: 'asentado',
+              onComplete: () => { card.style.willChange = 'auto'; }
+            });
+          } else if (variant === 'fold') {
+            // Variante 3: Desdoble origami diagonal
+            gsap.fromTo(card, {
+              y: 60,
+              rotationX: -40,
+              rotationY: isLeft ? 20 : -20,
+              skewY: isLeft ? 6 : -6,
+              scale: 0.88,
+              autoAlpha: 0,
+              transformPerspective: 1000,
+              transformOrigin: 'top center'
+            }, {
+              y: 0, rotationX: 0, rotationY: 0, skewY: 0, scale: 1, autoAlpha: 1,
+              duration: 1.1,
+              delay: index * 0.1,
+              ease: 'asentado',
+              onComplete: () => { card.style.willChange = 'auto'; }
+            });
+          }
         });
       };
 
-      // Inicialización
-      updateCurve(1.18);
-      animateCards();
+      runAnimation('flip');
 
-      slider.addEventListener('input', (e) => {
-        updateCurve(e.target.value);
-        animateCards();
+      variantBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          variantBtns.forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          currentVariant = btn.dataset.variant;
+          runAnimation(currentVariant);
+        });
       });
 
       if (btnReplay) {
-        btnReplay.addEventListener('click', animateCards);
+        btnReplay.addEventListener('click', () => runAnimation(currentVariant));
       }
     })();
   </script>
