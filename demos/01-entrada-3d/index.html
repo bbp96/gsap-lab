@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>01 — Entrada 3D con ScrollTrigger & CustomEase | GSAP Lab</title>
+  <style>
+    :root {
+      --bg-canvas: #0B0F17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1F2937;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(255, 107, 74, 0.5);
+      --text-primary: #F9FAFB;
+      --text-secondary: #9CA3AF;
+      --text-muted: #6B7280;
+      --accent-orange: #FF6B4A;
+      --accent-emerald: #10B981;
+      --accent-cyan: #06B6D4;
+      --accent-violet: #8B5CF6;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Shared Top Navigation */
+    .lab-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background: rgba(11, 15, 23, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .lab-nav__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .lab-nav__badge {
+      background: rgba(255, 107, 74, 0.15);
+      color: var(--accent-orange);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 107, 74, 0.3);
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+
+    .lab-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .lab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .lab-btn:hover {
+      background: var(--bg-surface-elevated);
+      border-color: var(--accent-orange);
+      transform: translateY(-1px);
+    }
+
+    .lab-btn--primary {
+      background: var(--accent-orange);
+      color: #000;
+      border-color: var(--accent-orange);
+      font-weight: 600;
+    }
+
+    .lab-btn--primary:hover {
+      background: #ff8266;
+      border-color: #ff8266;
+      color: #000;
+    }
+
+    /* Sections Layout */
+    .hero-section {
+      min-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 1.5rem 3rem;
+      position: relative;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 107, 74, 0.12) 0%, rgba(11, 15, 23, 0) 70%);
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-section__container {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+    }
+
+    .hero-section__tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-orange);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 107, 74, 0.08);
+      border: 1px solid rgba(255, 107, 74, 0.2);
+      border-radius: 999px;
+    }
+
+    .hero-section__title {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-section__title span {
+      background: linear-gradient(135deg, #FFFFFF 30%, var(--accent-orange) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section__lead {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto 2rem;
+    }
+
+    .scroll-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      animation: pulseIndicator 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseIndicator {
+      0%, 100% { opacity: 0.4; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(4px); }
+    }
+
+    /* 3D Scene Section */
+    .scene-section {
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1.5rem;
+      position: relative;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+      width: 100%;
+      perspective: 1200px; /* Perspectiva global del contenedor */
+    }
+
+    .card-3d {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 2.2rem 1.8rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      will-change: transform, opacity;
+      transform-style: preserve-3d;
+      transition: border-color 0.3s ease;
+    }
+
+    .card-3d:hover {
+      border-color: rgba(255, 107, 74, 0.4);
+    }
+
+    .card-3d::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-orange), transparent);
+      opacity: 0.7;
+    }
+
+    .card-3d__tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--accent-orange);
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.15rem 0.5rem;
+      background: rgba(255, 107, 74, 0.1);
+      border-radius: 4px;
+    }
+
+    .card-3d__title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+
+    .card-3d__desc {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-3d__code {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--accent-cyan);
+      overflow-x: auto;
+    }
+
+    /* Diagnostics & Curve Inspector */
+    .inspector-section {
+      max-width: 900px;
+      margin: 4rem auto;
+      padding: 2.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .inspector-section__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .inspector-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .inspector-section__title::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 10px var(--accent-emerald);
+    }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .inspector-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .curve-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .curve-box svg {
+      width: 100%;
+      max-width: 280px;
+      height: 140px;
+    }
+
+    .curve-box__caption {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .inspector-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .meta-row__label {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .meta-row__value {
+      font-family: var(--font-mono);
+      color: var(--accent-emerald);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    /* Outro WPO Note */
+    .wpo-note {
+      max-width: 900px;
+      margin: 2rem auto 6rem;
+      padding: 1.75rem 2rem;
+      border-left: 3px solid var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.05);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .wpo-note strong {
+      color: #fff;
+    }
+
+    .wpo-note code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent-orange);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent-orange);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <nav class="lab-nav" aria-label="Navegación del laboratorio">
+      <a href="../../index.html" class="lab-nav__brand">
+        <span>← GSAP LAB</span>
+        <span class="lab-nav__badge">DEMO 01/06</span>
+      </a>
+      <div class="lab-nav__actions">
+        <button id="btnReplay" class="lab-btn" title="Re-ejecutar animación">
+          <span>↺</span> Replay
+        </button>
+        <a href="README.md" class="lab-btn lab-btn--primary" target="_blank" rel="noopener">
+          Documentación
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-section">
+      <div class="hero-section__container">
+        <span class="hero-section__tag">ScrollTrigger & 3D Compositing</span>
+        <h1 class="hero-section__title">Entrada 3D con <span>CustomEase</span></h1>
+        <p class="hero-section__lead">
+          Transformaciones en el eje Y con perspectiva declarada y curva Bézier con overshoot. Diseñado para maximizar el impacto visual sin sacrificar 60 FPS en dispositivos móviles.
+        </p>
+        <div class="scroll-indicator">
+          <span>↓</span> HAZ SCROLL PARA DISPARAR EL TRIGGER
+        </div>
+      </div>
+    </section>
+
+    <!-- 3D Scene Section -->
+    <section class="scene-section" id="sceneSection">
+      <div class="cards-grid">
+        <article class="card-3d" data-direction="left">
+          <span class="card-3d__tag">TÉCNICA 01</span>
+          <h2 class="card-3d__title">Perspectiva & rotationY</h2>
+          <p class="card-3d__desc">
+            La rotación en Y requiere <code>transformPerspective</code> para proyectar profundidad volumétrica real. Sin perspectiva, el navegador simplemente aplana el elemento en 2D.
+          </p>
+          <pre class="card-3d__code">rotationY: 35,<br>transformPerspective: 900</pre>
+        </article>
+
+        <article class="card-3d" data-direction="right">
+          <span class="card-3d__tag">TÉCNICA 02</span>
+          <h2 class="card-3d__title">transformOrigin por Lado</h2>
+          <p class="card-3d__desc">
+            El punto de pivote define el realismo kinético. Si el elemento entra desde la izquierda, el eje debe anclarse en <code>left center</code>; desde la derecha, en <code>right center</code>.
+          </p>
+          <pre class="card-3d__code">transformOrigin: 'right center',<br>skewX: -6</pre>
+        </article>
+
+        <article class="card-3d" data-direction="left">
+          <span class="card-3d__tag">TÉCNICA 03</span>
+          <h2 class="card-3d__title">Curva CustomEase con Overshoot</h2>
+          <p class="card-3d__desc">
+            La curva sobrepasa deliberadamente el 100% de la trayectoria (1.18) y retorna sutilmente. Aporta peso físico y elasticidad natural imposible con curvas lineales.
+          </p>
+          <pre class="card-3d__code">CustomEase.create('asentado',<br>'M0,0 C0.34,1.18 0.6,1 1,1')</pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- Inspector & Diagnostic HUD -->
+    <section class="inspector-section" aria-label="Inspector de rendimiento y curvas">
+      <div class="inspector-section__header">
+        <h3 class="inspector-section__title">Inspector Técnico & Curva de Aceleración</h3>
+        <span class="card-3d__tag">TELEMETRÍA WPO</span>
+      </div>
+
+      <div class="inspector-grid">
+        <div class="curve-box">
+          <svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Grid Lines -->
+            <line x1="10" y1="90" x2="190" y2="90" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+            <line x1="10" y1="20" x2="190" y2="20" stroke="rgba(255,255,255,0.15)" stroke-dasharray="2 2" />
+            <text x="192" y="23" fill="#6B7280" font-size="7" font-family="monospace">1.0 (Target)</text>
+            <text x="192" y="10" fill="#FF6B4A" font-size="7" font-family="monospace">1.18 (Overshoot)</text>
+            <!-- Standard Curve (Power2.out) -->
+            <path d="M 10 90 Q 60 20 190 20" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="3 3" />
+            <!-- Custom Overshoot Curve -->
+            <path d="M 10 90 C 70 -5, 120 20, 190 20" stroke="#FF6B4A" stroke-width="2.5" />
+          </svg>
+          <p class="curve-box__caption">Naranja: CustomEase 'asentado' (Overshoot 18%) vs Gris: Power2.out estándar</p>
+        </div>
+
+        <div class="inspector-meta">
+          <div class="meta-row">
+            <span class="meta-row__label">ScrollTrigger Trigger:</span>
+            <span class="meta-row__value">top 88% viewport</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-row__label">Lifecycle Mode:</span>
+            <span class="meta-row__value">once: true (Desuscripción WPO)</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-row__label">Compositor Layer:</span>
+            <span class="meta-row__value">will-change: auto (Liberado)</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-row__label">Hardware Pipeline:</span>
+            <span class="meta-row__value">GPU Direct Matrix3D</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WPO Cost Note -->
+    <div class="wpo-note">
+      <strong>Análisis de Costo de Rendimiento (WPO):</strong> Las transformaciones 3D fuerzan la creación de una capa de composición (Composite Layer) en la GPU. Mantener <code>will-change: transform</code> de manera permanente satura la memoria VRAM en dispositivos de gama baja. En este módulo, <code>will-change</code> se asigna exclusivamente durante la fase de movimiento y se retira automáticamente a <code>auto</code> en el callback <code>onComplete</code>.
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      Diseñado y desarrollado por <strong>Benjamín Brante</strong> · Arquitectura Frontend & WPO<br>
+      <a href="https://brante.dev" target="_blank" rel="noopener">brante.dev</a> · 
+      <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a>
+    </p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+  <script>
+    /**
+     * CONTEXTO: Entrada 3D con ScrollTrigger y Curva Bézier CustomEase
+     * AUTOR: Benjamín Brante (Arquitecto Frontend)
+     * ESTRATEGIA:
+     * - Aislamiento de Scope: IIFE estricta sin contaminar el objeto window.
+     * - Gestión Eficiente de Memoria: Limpieza de capas de composición tras finalizar animación.
+     * - Tolerancia a Fallos y Accesibilidad: Bypass automático ante prefers-reduced-motion.
+     */
+    (() => {
+      'use strict';
+
+      // Validación de Accesibilidad (WCAG 2.1 AA)
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        console.info('[GSAP Lab] Prefers-reduced-motion activo. Animaciones 3D omitidas.');
+        return;
+      }
+
+      // Registro seguro de plugins
+      gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+      // Definición de curvas personalizadas
+      CustomEase.create('entrada', 'M0,0 C0.22,1 0.36,1 1,1');
+      CustomEase.create('asentado', 'M0,0 C0.34,1.18 0.6,1 1,1');
+
+      const cards = document.querySelectorAll('.card-3d');
+
+      const initAnimation = () => {
+        cards.forEach((el) => {
+          const isLeft = el.dataset.direction === 'left';
+
+          // Estado inicial GPU-accelerated
+          gsap.set(el, {
+            x: isLeft ? -120 : 120,
+            rotationY: isLeft ? 28 : -28,
+            skewX: isLeft ? 5 : -5,
+            scale: 0.94,
+            autoAlpha: 0,
+            transformPerspective: 900,
+            transformOrigin: isLeft ? 'left center' : 'right center'
+          });
+
+          // Declarar will-change preventivo
+          el.style.willChange = 'transform, opacity';
+
+          gsap.to(el, {
+            x: 0,
+            rotationY: 0,
+            skewX: 0,
+            scale: 1,
+            autoAlpha: 1,
+            duration: 1.15,
+            ease: 'asentado',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 88%',
+              once: true,            // Desuscripción del listener tras la ejecución
+              fastScrollEnd: true,   // Forzar completion inmediato ante scroll veloz
+              invalidateOnRefresh: true
+            },
+            onComplete: () => {
+              // Liberación de VRAM: remover la capa de composición explícita
+              el.style.willChange = 'auto';
+            }
+          });
+        });
+      };
+
+      // Inicialización
+      initAnimation();
+
+      // Botón de Replay interactivo
+      const btnReplay = document.getElementById('btnReplay');
+      if (btnReplay) {
+        btnReplay.addEventListener('click', () => {
+          // Scroll suave hacia la sección y reinicio
+          document.getElementById('sceneSection').scrollIntoView({ behavior: 'smooth' });
+          setTimeout(() => {
+            cards.forEach(card => {
+              ScrollTrigger.getById(card)?.kill();
+            });
+            initAnimation();
+          }, 350);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
