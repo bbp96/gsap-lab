@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10 — Canvas con Secuencia de Frames Controlado por Scroll | GSAP Lab</title>
+  <link rel="icon" type="image/png" href="../../assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0C10;
+      --bg-surface: #12141A;
+      --bg-surface-elevated: #171A23;
+      --border-subtle: #212532;
+      --border-strong: #2F3547;
+      --text-main: #FFFFFF;
+      --text-muted: #9BA3B5;
+      --text-dim: #5E6678;
+      --accent-primary: #10B981; /* Esmeralda sobrio */
+      --accent-seal: #D8442C;
+      --accent-cyan: #06B6D4;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'IBM Plex Mono', Monaco, Consolas, monospace;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 14px;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.12) 0%, transparent 65%),
+        radial-gradient(circle at 90% 40%, rgba(6, 182, 212, 0.04) 0%, transparent 45%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: rgba(11, 12, 16, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .site-header__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: opacity 0.2s ease;
+    }
+
+    .site-header__brand:hover { opacity: 0.9; }
+
+    .brand-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .brand-name {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .brand-divider {
+      color: var(--text-dim);
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+    }
+
+    .brand-project {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .desktop-nav { display: flex; align-items: center; gap: 0.35rem; }
+    @media (max-width: 950px) { .desktop-nav { display: none; } }
+
+    .nav-pill {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+    .nav-pill--active {
+      color: var(--accent-primary);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .btn-action:hover {
+      border-color: var(--accent-primary);
+      background: var(--bg-surface-elevated);
+      transform: translateY(-1px);
+    }
+
+    .btn-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    @media (max-width: 950px) { .btn-hamburger { display: flex; } }
+
+    .btn-hamburger span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-hamburger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .btn-hamburger.is-open span:nth-child(2) { opacity: 0; }
+    .btn-hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      position: fixed;
+      top: 57px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 57px);
+      background: rgba(11, 12, 16, 0.98);
+      backdrop-filter: blur(20px);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--ease-out);
+      z-index: 999;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .mobile-drawer.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-drawer__title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+
+    .mobile-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+    }
+
+    .mobile-nav-link--active { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+    /* Main Container */
+    .page-main {
+      flex: 1;
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 6.5rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-header { margin-bottom: 3rem; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-primary);
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 1rem;
+      color: #FFFFFF;
+    }
+
+    .hero-lead {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-muted);
+      max-width: 760px;
+      line-height: 1.6;
+    }
+
+    /* Live Telemetry HUD */
+    .hud-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      position: sticky;
+      top: 60px;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .hud-metric { display: flex; flex-direction: column; gap: 0.25rem; }
+    .hud-metric__label { font-family: var(--font-code); font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; }
+    .hud-metric__val { font-family: var(--font-code); font-size: 1.15rem; font-weight: 700; color: var(--accent-primary); }
+
+    /* Scroll Pinned Section */
+    .canvas-scroll-wrapper {
+      position: relative;
+      height: 350vh; /* Espacio para el scrub */
+      margin-bottom: 4rem;
+    }
+
+    .canvas-pin-container {
+      position: sticky;
+      top: 130px;
+      height: 70vh;
+      min-height: 480px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    .canvas-overlay-text {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      right: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+
+    .overlay-tag {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      background: rgba(11, 12, 16, 0.85);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Explanation Breakdown */
+    .explanation-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .explanation-box h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .explanation-box p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1rem; }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      padding: 3.5rem 1.5rem;
+      margin-top: auto;
+    }
+
+    .site-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .footer-col__title {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links-list a { font-family: var(--font-code); font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+    .footer-links-list a:hover { color: var(--accent-primary); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2.5rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="../../index.html" class="site-header__brand">
+        <div class="brand-avatar">
+          <img src="../../assets/img/logo.png" alt="Benjamín Brante Logo" class="brand-img">
+        </div>
+        <span class="brand-name">Benjamín Brante</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-project">GSAP LAB</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegación">
+        <a href="../01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
+        <a href="../02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
+        <a href="../07-matchmedia-responsive/index.html" class="nav-pill">07. matchMedia</a>
+        <a href="../08-context-cleanup/index.html" class="nav-pill">08. Context</a>
+        <a href="../09-texto-revelado-lineas/index.html" class="nav-pill">09. Split Text</a>
+        <a href="index.html" class="nav-pill nav-pill--active">10. Canvas Scrub</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="README.md" class="btn-action" target="_blank" rel="noopener"><span>//</span> README</a>
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
+    <span class="mobile-drawer__title">Demos Técnicas</span>
+    <a href="../01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entradas 3D & CustomEase</span> <span>→</span></a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa</span> <span>→</span></a>
+    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos</span> <span>→</span></a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport</span> <span>→</span></a>
+    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional</span> <span>→</span></a>
+    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link"><span>06. Recálculo Imágenes</span> <span>→</span></a>
+    <a href="../07-matchmedia-responsive/index.html" class="mobile-nav-link"><span>07. gsap.matchMedia()</span> <span>→</span></a>
+    <a href="../08-context-cleanup/index.html" class="mobile-nav-link"><span>08. gsap.context()</span> <span>→</span></a>
+    <a href="../09-texto-revelado-lineas/index.html" class="mobile-nav-link"><span>09. Texto por Líneas</span> <span>→</span></a>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>10. Canvas Scroll Scrub</span> <span>→</span></a>
+    <a href="../11-benchmark-transform-vs-layout/index.html" class="mobile-nav-link"><span>11. Benchmark Transform vs Top</span> <span>→</span></a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-primary);"><span>← Volver al Hub Principal</span></a>
+  </div>
+
+  <main class="page-main">
+    <section class="hero-header">
+      <div class="hero-badge">Técnica: HTML5 Canvas 2D + ScrollTrigger Scrub</div>
+      <h1 class="hero-title">Secuencia de Frames en Canvas con Scrub</h1>
+      <p class="hero-lead">
+        El patrón cinematográfico tipo Apple (AirPods, Mac Pro) donde una secuencia de imágenes se reproduce hacia adelante y hacia atrás al hacer scroll. Implementado sobre Canvas 2D para garantizar 60 FPS estables sin parpadeos de red ni sobrecarga en el DOM.
+      </p>
+    </section>
+
+    <!-- Sticky Telemetry HUD -->
+    <section class="hud-box" aria-label="Telemetría de Scroll">
+      <div class="hud-metric">
+        <span class="hud-metric__label">Frame Actual</span>
+        <span class="hud-metric__val" id="hudFrame">Frame 0 / 120</span>
+      </div>
+      <div class="hud-metric">
+        <span class="hud-metric__label">Progreso de Scrub</span>
+        <span class="hud-metric__val" id="hudProgress">0.0%</span>
+      </div>
+      <div class="hud-metric">
+        <span class="hud-metric__label">Renderizador</span>
+        <span class="hud-metric__val" style="color: var(--accent-primary);">Canvas 2D (GPU Compuesto)</span>
+      </div>
+    </section>
+
+    <!-- Pinned Scroll Track -->
+    <div class="canvas-scroll-wrapper" id="scrollTrack">
+      <div class="canvas-pin-container">
+        <canvas id="sequenceCanvas" width="800" height="500"></canvas>
+        <div class="canvas-overlay-text">
+          <span class="overlay-tag" id="overlayPhase">[FASE 01: Ensamblaje Inicial]</span>
+          <span class="overlay-tag" style="color: var(--text-muted);">Haz scroll hacia abajo para avanzar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation Box -->
+    <section class="explanation-box">
+      <h2>Por qué Canvas supera el cambio de etiquetas &lt;img src="..."&gt;</h2>
+      <p>
+        Cambiar la propiedad <code>src</code> de un elemento <code>&lt;img&gt;</code> en cada evento de scroll obliga al motor del navegador a decodificar la imagen en el hilo principal de forma síncrona, produciendo tirones visibles (Jank) y parpadeos blancos.
+      </p>
+      <p>
+        Al dibujar sobre un único <code>&lt;canvas&gt;</code> mediante <code>ctx.drawImage()</code> o generación procedural vectorial, el frame se transfiere directamente al búfer de pantalla de la GPU en menos de 1 milisegundo, permitiendo una experiencia suave a 60 FPS.
+      </p>
+    </section>
+  </main>
+
+  <!-- Senior Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__container">
+      <div>
+        <div class="footer-col__title">Benjamín Brante</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
+          Desarrollador Web · Arquitectura Frontend, Seguridad & Optimización WPO en WordPress y ecosistemas Headless.
+        </p>
+      </div>
+      <div>
+        <div class="footer-col__title">Navegación</div>
+        <ul class="footer-links-list">
+          <li><a href="../../index.html">Portal Principal GSAP Lab</a></li>
+          <li><a href="../01-entrada-3d/index.html">01. Entrada 3D & CustomEase</a></li>
+          <li><a href="../07-matchmedia-responsive/index.html">07. gsap.matchMedia()</a></li>
+          <li><a href="../11-benchmark-transform-vs-layout/index.html">11. Benchmark Transform vs Top</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col__title">Contacto</div>
+        <ul class="footer-links-list">
+          <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
+          <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Benjamín Brante Pardo. Código abierto bajo licencia MIT.</span>
+      <span>60 FPS GPU Pipeline · Zero CLS Standards</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script>
+    (() => {
+      'use strict';
+
+      const btnMenuToggle = document.getElementById('btnMenuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      if (btnMenuToggle && mobileDrawer) {
+        btnMenuToggle.addEventListener('click', () => {
+          const isOpen = mobileDrawer.classList.toggle('is-open');
+          btnMenuToggle.classList.toggle('is-open', isOpen);
+          btnMenuToggle.setAttribute('aria-expanded', isOpen);
+          mobileDrawer.setAttribute('aria-hidden', !isOpen);
+        });
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const canvas = document.getElementById('sequenceCanvas');
+      const ctx = canvas.getContext('2d');
+      const hudFrame = document.getElementById('hudFrame');
+      const hudProgress = document.getElementById('hudProgress');
+      const overlayPhase = document.getElementById('overlayPhase');
+
+      const TOTAL_FRAMES = 120;
+      const sequence = { frame: 0 };
+
+      // Renderizador vectorial procedural de alta velocidad (Simula secuencia 3D sin peso de assets)
+      const drawFrame = (frameIndex) => {
+        const width = canvas.width;
+        const height = canvas.height;
+        const progress = frameIndex / TOTAL_FRAMES;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Anillo exterior rotatorio
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(progress * Math.PI * 4);
+
+        ctx.strokeStyle = `rgba(16, 185, 129, ${0.3 + progress * 0.7})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 140, 0, Math.PI * 1.5);
+        ctx.stroke();
+
+        // Nodos orbitales
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2 + progress * Math.PI * 2;
+          const nx = Math.cos(angle) * (140 + Math.sin(progress * Math.PI * 4) * 20);
+          const ny = Math.sin(angle) * (140 + Math.sin(progress * Math.PI * 4) * 20);
+          ctx.fillStyle = i % 2 === 0 ? '#06B6D4' : '#10B981';
+          ctx.beginPath();
+          ctx.arc(nx, ny, 6 + Math.sin(progress * Math.PI * 2 + i) * 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+
+        // Cubo isométrico central giratorio
+        ctx.save();
+        ctx.translate(cx, cy);
+        const scale = 0.8 + progress * 0.4;
+        ctx.scale(scale, scale);
+        ctx.rotate(-progress * Math.PI * 2);
+
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-50, -50, 100, 100);
+
+        ctx.strokeStyle = '#D8442C';
+        ctx.strokeRect(-30, -30, 60, 60);
+
+        ctx.restore();
+
+        // HUD Text en Canvas
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '12px "IBM Plex Mono", monospace';
+        ctx.fillText(`VECTOR ENGINE // FRAME: ${Math.round(frameIndex)} / ${TOTAL_FRAMES}`, 30, 40);
+        ctx.fillText(`PROGRESS: ${(progress * 100).toFixed(1)}%`, 30, 60);
+      };
+
+      // Inicializar frame 0
+      drawFrame(0);
+
+      // ScrollTrigger Scrub
+      gsap.to(sequence, {
+        frame: TOTAL_FRAMES,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#scrollTrack',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.5,
+          onUpdate: (self) => {
+            const current = Math.min(TOTAL_FRAMES, Math.max(0, Math.round(sequence.frame)));
+            drawFrame(current);
+            hudFrame.textContent = `Frame ${current} / ${TOTAL_FRAMES}`;
+            hudProgress.textContent = `${(self.progress * 100).toFixed(1)}%`;
+
+            if (self.progress < 0.33) {
+              overlayPhase.textContent = '[FASE 01: Ensamblaje Vectorial Inicial]';
+            } else if (self.progress < 0.66) {
+              overlayPhase.textContent = '[FASE 02: Aceleración Orbital y Rotación Central]';
+            } else {
+              overlayPhase.textContent = '[FASE 03: Alineación Geométrica Final a 60 FPS]';
+            }
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

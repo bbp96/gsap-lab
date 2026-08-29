@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>07 — Timeline con gsap.matchMedia() | GSAP Lab</title>
+  <link rel="icon" type="image/png" href="../../assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0C10;
+      --bg-surface: #12141A;
+      --bg-surface-elevated: #171A23;
+      --border-subtle: #212532;
+      --border-strong: #2F3547;
+      --text-main: #FFFFFF;
+      --text-muted: #9BA3B5;
+      --text-dim: #5E6678;
+      --accent-primary: #D8442C; /* Rojo sello brante.dev */
+      --accent-emerald: #0E7A4E;
+      --accent-cyan: #06B6D4;
+      --accent-violet: #8B5CF6;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'IBM Plex Mono', Monaco, Consolas, monospace;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 14px;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(216, 68, 44, 0.12) 0%, transparent 65%),
+        radial-gradient(circle at 90% 40%, rgba(6, 182, 212, 0.04) 0%, transparent 45%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: rgba(11, 12, 16, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .site-header__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: opacity 0.2s ease;
+    }
+
+    .site-header__brand:hover { opacity: 0.9; }
+
+    .brand-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .brand-name {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .brand-divider {
+      color: var(--text-dim);
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+    }
+
+    .brand-project {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .desktop-nav { display: flex; align-items: center; gap: 0.35rem; }
+    @media (max-width: 950px) { .desktop-nav { display: none; } }
+
+    .nav-pill {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+    .nav-pill--active {
+      color: var(--accent-primary);
+      background: rgba(216, 68, 44, 0.1);
+      border: 1px solid rgba(216, 68, 44, 0.25);
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .btn-action:hover {
+      border-color: var(--accent-primary);
+      background: var(--bg-surface-elevated);
+      transform: translateY(-1px);
+    }
+
+    .btn-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    @media (max-width: 950px) { .btn-hamburger { display: flex; } }
+
+    .btn-hamburger span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-hamburger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .btn-hamburger.is-open span:nth-child(2) { opacity: 0; }
+    .btn-hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      position: fixed;
+      top: 57px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 57px);
+      background: rgba(11, 12, 16, 0.98);
+      backdrop-filter: blur(20px);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--ease-out);
+      z-index: 999;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .mobile-drawer.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-drawer__title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+
+    .mobile-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+    }
+
+    .mobile-nav-link--active { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+    /* Main Container */
+    .page-main {
+      flex: 1;
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 6.5rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-header { margin-bottom: 3rem; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-primary);
+      background: rgba(216, 68, 44, 0.08);
+      border: 1px solid rgba(216, 68, 44, 0.25);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 1rem;
+      color: #FFFFFF;
+    }
+
+    .hero-lead {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-muted);
+      max-width: 760px;
+      line-height: 1.6;
+    }
+
+    /* Live HUD */
+    .hud-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .hud-metric { display: flex; flex-direction: column; gap: 0.25rem; }
+    .hud-metric__label { font-family: var(--font-code); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+    .hud-metric__val { font-family: var(--font-code); font-size: 1.15rem; font-weight: 700; color: var(--accent-primary); }
+
+    /* Interactive Showcase Arena */
+    .responsive-stage {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
+      margin-bottom: 3.5rem;
+      min-height: 460px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cards-track {
+      display: flex;
+      gap: 1.5rem;
+      width: 100%;
+      transition: gap 0.3s ease;
+    }
+
+    .stage-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      will-change: transform, opacity;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .stage-card__tag {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-bottom: 0.75rem;
+    }
+
+    .stage-card__title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .stage-card__desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Explanation Breakdown */
+    .explanation-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .explanation-box h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .explanation-box p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1rem; }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      padding: 3.5rem 1.5rem;
+      margin-top: auto;
+    }
+
+    .site-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .footer-col__title {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links-list a { font-family: var(--font-code); font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+    .footer-links-list a:hover { color: var(--accent-primary); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2.5rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="../../index.html" class="site-header__brand">
+        <div class="brand-avatar">
+          <img src="../../assets/img/logo.png" alt="Benjamín Brante Logo" class="brand-img">
+        </div>
+        <span class="brand-name">Benjamín Brante</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-project">GSAP LAB</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegación">
+        <a href="../01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
+        <a href="../02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
+        <a href="../04-suspension-viewport/index.html" class="nav-pill">04. Viewport IO</a>
+        <a href="index.html" class="nav-pill nav-pill--active">07. matchMedia</a>
+        <a href="../08-context-cleanup/index.html" class="nav-pill">08. Context</a>
+        <a href="../09-texto-revelado-lineas/index.html" class="nav-pill">09. Split Text</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="README.md" class="btn-action" target="_blank" rel="noopener"><span>//</span> README</a>
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
+    <span class="mobile-drawer__title">Demos Técnicas</span>
+    <a href="../01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entradas 3D & CustomEase</span> <span>→</span></a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa</span> <span>→</span></a>
+    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos</span> <span>→</span></a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport</span> <span>→</span></a>
+    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional</span> <span>→</span></a>
+    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link"><span>06. Recálculo Imágenes</span> <span>→</span></a>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>07. gsap.matchMedia()</span> <span>→</span></a>
+    <a href="../08-context-cleanup/index.html" class="mobile-nav-link"><span>08. gsap.context()</span> <span>→</span></a>
+    <a href="../09-texto-revelado-lineas/index.html" class="mobile-nav-link"><span>09. Texto por Líneas</span> <span>→</span></a>
+    <a href="../10-canvas-secuencia-scroll/index.html" class="mobile-nav-link"><span>10. Canvas Scroll Scrub</span> <span>→</span></a>
+    <a href="../11-benchmark-transform-vs-layout/index.html" class="mobile-nav-link"><span>11. Benchmark Transform vs Top</span> <span>→</span></a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-primary);"><span>← Volver al Hub Principal</span></a>
+  </div>
+
+  <main class="page-main">
+    <section class="hero-header">
+      <div class="hero-badge">Técnica: gsap.matchMedia() & Limpieza Automática</div>
+      <h1 class="hero-title">Timelines Responsivas con gsap.matchMedia()</h1>
+      <p class="hero-lead">
+        En móvil necesitas un flujo vertical simple, mientras que en escritorio buscas un carrusel horizontal con fijación (pinning). La forma limpia de hacerlo sin dejar estilos pegados ni duplicar listeners al cambiar la orientación de la pantalla es <code>gsap.matchMedia()</code>.
+      </p>
+    </section>
+
+    <!-- Live Telemetry HUD -->
+    <section class="hud-box" aria-label="HUD de Breakpoints">
+      <div class="hud-metric">
+        <span class="hud-metric__label">Breakpoint Activo</span>
+        <span class="hud-metric__val" id="hudBreakpoint">Calculando...</span>
+      </div>
+      <div class="hud-metric">
+        <span class="hud-metric__label">Ancho de Ventana</span>
+        <span class="hud-metric__val" id="hudWidth">0 px</span>
+      </div>
+      <div class="hud-metric">
+        <span class="hud-metric__label">Estado del Contexto</span>
+        <span class="hud-metric__val" style="color: var(--accent-emerald);">Auto-Revert Activo</span>
+      </div>
+    </section>
+
+    <!-- Stage Track Arena -->
+    <section class="responsive-stage" id="stageContainer">
+      <div class="cards-track" id="cardsTrack">
+        <article class="stage-card">
+          <span class="stage-card__tag">// NODO 01</span>
+          <h2 class="stage-card__title">1. Desplazamiento</h2>
+          <p class="stage-card__desc">
+            En desktop se desplaza lateralmente con pinning. En móvil se apila verticalmente con stagger en cascada.
+          </p>
+        </article>
+
+        <article class="stage-card">
+          <span class="stage-card__tag">// NODO 02</span>
+          <h2 class="stage-card__title">2. Limpieza de Estilos</h2>
+          <p class="stage-card__desc">
+            Al redimensionar, matchMedia revierte las propiedades en línea para que ningún inline-style ensucie el CSS.
+          </p>
+        </article>
+
+        <article class="stage-card">
+          <span class="stage-card__tag">// NODO 03</span>
+          <h2 class="stage-card__title">3. Modo Accesible</h2>
+          <p class="stage-card__desc">
+            Si el usuario activa prefers-reduced-motion en su sistema operativo, matchMedia desactiva los desplazamientos agresivos al instante.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Explanation Notes -->
+    <section class="explanation-box">
+      <h2>Por qué es mejor que escuchar resize con JavaScript</h2>
+      <p>
+        El error habitual es poner <code>window.addEventListener('resize', debouncedFn)</code> y recrear los ScrollTriggers a mano. Eso casi siempre deja estilos <code>transform: translate3d(...)</code> pegados en el DOM cuando pasas de móvil a escritorio, provocando que la página se descuadre o se desborde horizontalmente.
+      </p>
+      <p>
+        Con <code>gsap.matchMedia()</code>, GSAP aísla las animaciones en un contexto por consulta de medios y las revierte automáticamente a su estado original antes de ejecutar el bloque correspondiente al nuevo tamaño.
+      </p>
+    </section>
+  </main>
+
+  <!-- Senior Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__container">
+      <div>
+        <div class="footer-col__title">Benjamín Brante</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
+          Desarrollador Web · Arquitectura Frontend, Seguridad & Optimización WPO en WordPress y ecosistemas Headless.
+        </p>
+      </div>
+      <div>
+        <div class="footer-col__title">Navegación</div>
+        <ul class="footer-links-list">
+          <li><a href="../../index.html">Portal Principal GSAP Lab</a></li>
+          <li><a href="../01-entrada-3d/index.html">01. Entrada 3D & CustomEase</a></li>
+          <li><a href="../08-context-cleanup/index.html">08. gsap.context()</a></li>
+          <li><a href="../11-benchmark-transform-vs-layout/index.html">11. Benchmark Transform vs Top</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col__title">Contacto</div>
+        <ul class="footer-links-list">
+          <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
+          <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Benjamín Brante Pardo. Código abierto bajo licencia MIT.</span>
+      <span>60 FPS GPU Pipeline · Zero CLS Standards</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script>
+    (() => {
+      'use strict';
+
+      const btnMenuToggle = document.getElementById('btnMenuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      if (btnMenuToggle && mobileDrawer) {
+        btnMenuToggle.addEventListener('click', () => {
+          const isOpen = mobileDrawer.classList.toggle('is-open');
+          btnMenuToggle.classList.toggle('is-open', isOpen);
+          btnMenuToggle.setAttribute('aria-expanded', isOpen);
+          mobileDrawer.setAttribute('aria-hidden', !isOpen);
+        });
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const hudBreakpoint = document.getElementById('hudBreakpoint');
+      const hudWidth = document.getElementById('hudWidth');
+      const cardsTrack = document.getElementById('cardsTrack');
+      const cards = document.querySelectorAll('.stage-card');
+
+      const updateWidth = () => {
+        hudWidth.textContent = `${window.innerWidth} px`;
+      };
+      window.addEventListener('resize', updateWidth);
+      updateWidth();
+
+      const mm = gsap.matchMedia();
+
+      // Breakpoint Desktop (> 800px)
+      mm.add("(min-width: 801px)", () => {
+        hudBreakpoint.textContent = "Desktop (>800px) — Desplazamiento Horizontal";
+        cardsTrack.style.flexDirection = "row";
+
+        gsap.from(cards, {
+          x: 120,
+          opacity: 0,
+          stagger: 0.15,
+          duration: 1,
+          ease: "power3.out"
+        });
+
+        return () => {
+          // Callback de limpieza opcional
+        };
+      });
+
+      // Breakpoint Mobile (<= 800px)
+      mm.add("(max-width: 800px)", () => {
+        hudBreakpoint.textContent = "Mobile (<=800px) — Cascada Vertical";
+        cardsTrack.style.flexDirection = "column";
+
+        gsap.from(cards, {
+          y: 40,
+          opacity: 0,
+          stagger: 0.12,
+          duration: 0.8,
+          ease: "power2.out"
+        });
+      });
+
+      // Accesibilidad: prefers-reduced-motion
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        hudBreakpoint.textContent = "Accesibilidad — Movimiento Reducido (Sin transiciones bruscas)";
+        gsap.set(cards, { opacity: 1, x: 0, y: 0 });
+      });
+    })();
+  </script>
+</body>
+</html>
