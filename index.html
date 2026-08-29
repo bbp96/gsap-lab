@@ -151,6 +151,132 @@
 
     .nav-link:hover { color: var(--text-main); }
 
+    /* Dropdown Navigation */
+    .nav-item-dropdown {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    .nav-link--dropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+    }
+
+    .dropdown-chevron {
+      font-size: 0.65rem;
+      transition: transform 0.22s var(--ease-out);
+      color: var(--text-dim);
+    }
+
+    .nav-item-dropdown:hover .dropdown-chevron,
+    .nav-item-dropdown:focus-within .dropdown-chevron {
+      transform: rotate(180deg);
+      color: var(--accent-seal);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      width: 600px;
+      background: rgba(18, 20, 26, 0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 0.85rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
+      z-index: 1100;
+    }
+
+    /* Hover bridge */
+    .dropdown-menu::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: 0;
+      right: 0;
+      height: 16px;
+    }
+
+    .nav-item-dropdown:hover .dropdown-menu,
+    .nav-item-dropdown:focus-within .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-main);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus-visible {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+      transform: translateY(-1px);
+    }
+
+    .dropdown-item__num {
+      font-family: var(--font-code);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent-seal);
+      background: rgba(216, 68, 44, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: var(--radius-sm);
+      line-height: 1;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .dropdown-item__info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .dropdown-item__title {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.25;
+    }
+
+    .dropdown-item:hover .dropdown-item__title {
+      color: var(--accent-seal);
+    }
+
+    .dropdown-item__desc {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
     .header-actions {
       display: flex;
       align-items: center;
@@ -553,7 +679,88 @@
       </a>
 
       <nav class="desktop-nav" aria-label="Navegación">
-        <a href="#catalogo" class="nav-link">Catálogo (11)</a>
+        <div class="nav-item-dropdown">
+          <a href="#catalogo" class="nav-link nav-link--dropdown">Catálogo (11) <span class="dropdown-chevron">▾</span></a>
+          <div class="dropdown-menu" role="menu">
+            <a href="demos/01-entrada-3d/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">01</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Entradas 3D & CustomEase</span>
+                <span class="dropdown-item__desc">Perspectiva en eje Y y VRAM cleanup</span>
+              </div>
+            </a>
+            <a href="demos/02-parallax-multicapa/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">02</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Parallax Multicapa & Scrub</span>
+                <span class="dropdown-item__desc">Timeline unificada sin listeners duplicados</span>
+              </div>
+            </a>
+            <a href="demos/03-loops-desfasados/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">03</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Bucles Armónicos Desfasados</span>
+                <span class="dropdown-item__desc">Duraciones primas para movimiento orgánico</span>
+              </div>
+            </a>
+            <a href="demos/04-suspension-viewport/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">04</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Suspensión Viewport</span>
+                <span class="dropdown-item__desc">IntersectionObserver y ahorro de CPU</span>
+              </div>
+            </a>
+            <a href="demos/05-carga-condicional/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">05</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Carga Condicional & Guard rAF</span>
+                <span class="dropdown-item__desc">Sondeo frame a frame sin setTimeout</span>
+              </div>
+            </a>
+            <a href="demos/06-refresh-lazy-images/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">06</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Recálculo tras Imágenes & Zero CLS</span>
+                <span class="dropdown-item__desc">Reserva CSS y ScrollTrigger.refresh()</span>
+              </div>
+            </a>
+            <a href="demos/07-matchmedia-responsive/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">07</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Timelines con gsap.matchMedia()</span>
+                <span class="dropdown-item__desc">Reversión automática por breakpoint</span>
+              </div>
+            </a>
+            <a href="demos/08-context-cleanup/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">08</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Aislamiento con gsap.context()</span>
+                <span class="dropdown-item__desc">Limpieza completa de memoria en SPAs</span>
+              </div>
+            </a>
+            <a href="demos/09-texto-revelado-lineas/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">09</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Texto Revelado sin Plugins de Pago</span>
+                <span class="dropdown-item__desc">Máscaras con overflow:hidden en Vanilla JS</span>
+              </div>
+            </a>
+            <a href="demos/10-canvas-secuencia-scroll/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">10</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Canvas con Secuencia por Scroll</span>
+                <span class="dropdown-item__desc">Scrub cinemático en un único canvas 2D</span>
+              </div>
+            </a>
+            <a href="demos/11-benchmark-transform-vs-layout/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">11</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Benchmark: transform vs top/left</span>
+                <span class="dropdown-item__desc">Medición en vivo de Reflows y FPS</span>
+              </div>
+            </a>
+          </div>
+        </div>
         <a href="#criterios" class="nav-link">Criterios WPO</a>
         <a href="https://brante.dev" class="nav-link" target="_blank" rel="noopener">brante.dev ↗</a>
       </nav>
