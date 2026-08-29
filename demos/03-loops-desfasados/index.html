@@ -3,462 +3,586 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>03 — Animaciones en Bucle Desfasadas | GSAP Lab</title>
+  <title>03 — Bucles Armónicos Desfasados | GSAP Performance Lab</title>
   <style>
     :root {
-      --bg-canvas: #0B0F17;
-      --bg-surface: #111827;
-      --bg-surface-elevated: #1F2937;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-primary: #F9FAFB;
-      --text-secondary: #9CA3AF;
-      --text-muted: #6B7280;
-      --accent-orange: #FF6B4A;
+      --bg-base: #08090C;
+      --bg-surface: #0E1117;
+      --bg-surface-elevated: #151922;
+      --bg-surface-glass: rgba(14, 17, 23, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text-main: #FFFFFF;
+      --text-muted: #8E96A4;
+      --text-dim: #545C6A;
+      --accent-coral: #E05A3E;
       --accent-emerald: #10B981;
       --accent-cyan: #06B6D4;
       --accent-violet: #8B5CF6;
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-code: 'SF Mono', Monaco, Consolas, 'Liberation Mono', Menlo, monospace;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-canvas);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-ui);
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Shared Navigation */
-    .lab-nav {
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    .site-header {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1.5rem;
-      background: rgba(11, 15, 23, 0.85);
-      backdrop-filter: blur(16px);
+      z-index: 1000;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .lab-nav__brand {
+    .site-header__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header__brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       text-decoration: none;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      font-weight: 600;
+      color: var(--text-main);
     }
 
-    .lab-nav__badge {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-emerald);
-      padding: 0.2rem 0.5rem;
+    .brand-symbol {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-code);
+      font-weight: 800;
+      font-size: 0.75rem;
+      color: #000;
+    }
+
+    .brand-title { font-family: var(--font-code); font-size: 0.85rem; font-weight: 700; }
+    .brand-badge {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 4px;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      font-size: 0.72rem;
-      letter-spacing: 0.05em;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent-emerald);
     }
 
-    .lab-btn {
+    .desktop-nav { display: flex; align-items: center; gap: 0.5rem; }
+    @media (max-width: 900px) { .desktop-nav { display: none; } }
+
+    .nav-pill {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+    .nav-pill--active {
+      color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-action {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
       padding: 0.4rem 0.85rem;
-      font-size: 0.8rem;
-      font-family: var(--font-mono);
-      font-weight: 500;
-      border-radius: 6px;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.2s var(--ease-out);
+      transition: all 0.2s ease;
       border: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
-      color: var(--text-primary);
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
     }
 
-    .lab-btn:hover {
-      background: var(--bg-surface-elevated);
+    .btn-action:hover {
       border-color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.15);
       transform: translateY(-1px);
     }
 
-    .lab-btn--primary {
-      background: var(--accent-emerald);
-      color: #000;
+    .btn-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    @media (max-width: 900px) { .btn-hamburger { display: flex; } }
+
+    .btn-hamburger span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-hamburger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .btn-hamburger.is-open span:nth-child(2) { opacity: 0; }
+    .btn-hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      position: fixed;
+      top: 57px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 57px);
+      background: rgba(8, 9, 12, 0.98);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--transition-smooth);
+      z-index: 999;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .mobile-drawer.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-drawer__section-title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+
+    .mobile-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .mobile-nav-link:hover, .mobile-nav-link--active {
       border-color: var(--accent-emerald);
-      font-weight: 600;
-    }
-
-    .lab-btn--primary:hover {
-      background: #34d399;
-      color: #000;
-    }
-
-    /* Main Container */
-    .lab-container {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 7rem 1.5rem 4rem;
-    }
-
-    .header-block {
-      text-align: center;
-      max-width: 720px;
-      margin: 0 auto 3.5rem;
-    }
-
-    .header-block__tag {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
+      background: var(--bg-surface-elevated);
       color: var(--accent-emerald);
-      letter-spacing: 0.12em;
+    }
+
+    /* Page Layout */
+    .page-main {
+      flex: 1;
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 6.5rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-header { margin-bottom: 3rem; }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
       text-transform: uppercase;
-      margin-bottom: 1rem;
-      padding: 0.25rem 0.75rem;
+      letter-spacing: 0.12em;
+      color: var(--accent-emerald);
       background: rgba(16, 185, 129, 0.08);
       border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 0.3rem 0.75rem;
       border-radius: 999px;
-      display: inline-block;
+      margin-bottom: 1.25rem;
     }
 
-    .header-block__title {
-      font-size: clamp(2rem, 4.5vw, 3rem);
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
       font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 1rem;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      margin-bottom: 1.25rem;
     }
 
-    .header-block__title span {
-      background: linear-gradient(135deg, #FFFFFF 30%, var(--accent-emerald) 100%);
+    .hero-title span {
+      background: linear-gradient(135deg, #FFFFFF 40%, var(--accent-emerald) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .header-block__lead {
-      color: var(--text-secondary);
-      font-size: 1.05rem;
+    .hero-lead {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-muted);
+      max-width: 740px;
+      line-height: 1.65;
     }
 
-    /* Floating Showcase Grid */
-    .showcase-arena {
+    /* Showcase Arena */
+    .nodes-arena {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 4rem 2rem;
-      margin-bottom: 4rem;
+      border-radius: var(--radius-lg);
+      padding: 4.5rem 2rem;
+      margin-bottom: 3.5rem;
       position: relative;
-      overflow: hidden;
-    }
-
-    .showcase-arena::before {
-      content: '';
-      position: absolute;
-      width: 350px;
-      height: 350px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    .node-grid {
-      display: flex;
-      gap: 2.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      z-index: 2;
-    }
-
-    .ambient-node {
-      width: 110px;
-      height: 110px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(17, 24, 39, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .nodes-grid {
+      display: flex;
+      gap: 2.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .ambient-node {
+      width: 105px;
+      height: 105px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
       will-change: transform;
       position: relative;
-      cursor: pointer;
     }
 
-    .ambient-node--circle { border-radius: 50%; border-color: rgba(255, 107, 74, 0.4); }
-    .ambient-node--square { border-radius: 14px; border-color: rgba(16, 185, 129, 0.4); }
-    .ambient-node--diamond { border-radius: 14px; border-color: rgba(6, 182, 212, 0.4); transform: rotate(45deg); }
+    .ambient-node--circle { border-radius: 50%; border-color: rgba(224, 90, 62, 0.4); }
+    .ambient-node--square { border-radius: var(--radius-md); border-color: rgba(16, 185, 129, 0.4); }
+    .ambient-node--diamond { border-radius: var(--radius-md); border-color: rgba(6, 182, 212, 0.4); transform: rotate(45deg); }
     .ambient-node--diamond .node-inner { transform: rotate(-45deg); }
 
-    .node-inner {
-      text-align: center;
-      font-family: var(--font-mono);
-    }
+    .node-inner { text-align: center; font-family: var(--font-code); }
+    .node-inner__num { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .node-inner__meta { font-size: 0.65rem; color: var(--text-dim); }
 
-    .node-inner__num {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .node-inner__meta {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-top: 0.1rem;
-    }
-
-    /* Side-by-Side Comparison Arena */
-    .comparison-section {
+    /* Comparison Split */
+    .comparison-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
       margin-bottom: 4rem;
     }
 
-    @media (max-width: 768px) {
-      .comparison-section { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 768px) { .comparison-grid { grid-template-columns: 1fr; } }
 
-    .comparison-card {
+    .comp-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       padding: 2rem;
       text-align: center;
     }
 
-    .comparison-card--bad { border-top: 3px solid var(--accent-orange); }
-    .comparison-card--good { border-top: 3px solid var(--accent-emerald); }
+    .comp-card--bad { border-top: 3px solid var(--accent-coral); }
+    .comp-card--good { border-top: 3px solid var(--accent-emerald); }
 
-    .comparison-card__title {
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
+    .comp-card__title {
+      font-family: var(--font-code);
+      font-size: 0.88rem;
+      font-weight: 700;
       margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
     }
 
-    .comparison-card--bad .comparison-card__title { color: var(--accent-orange); }
-    .comparison-card--good .comparison-card__title { color: var(--accent-emerald); }
+    .comp-card--bad .comp-card__title { color: var(--accent-coral); }
+    .comp-card--good .comp-card__title { color: var(--accent-emerald); }
 
-    .mini-row {
+    .comp-row {
       display: flex;
       justify-content: center;
       gap: 1.25rem;
       margin-bottom: 1.5rem;
-      min-height: 80px;
+      min-height: 70px;
       align-items: center;
     }
 
-    .mini-dot {
-      width: 36px;
-      height: 36px;
+    .comp-dot {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-subtle);
       will-change: transform;
     }
 
-    .comparison-card--bad .mini-dot { background: rgba(255, 107, 74, 0.2); border-color: var(--accent-orange); }
-    .comparison-card--good .mini-dot { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-emerald); }
+    .comp-card--bad .comp-dot { background: rgba(224, 90, 62, 0.2); border: 1px solid var(--accent-coral); }
+    .comp-card--good .comp-dot { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent-emerald); }
 
-    .comparison-desc {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* WPO Note */
-    .wpo-note {
-      padding: 1.75rem 2rem;
-      border-left: 3px solid var(--accent-emerald);
-      background: rgba(16, 185, 129, 0.05);
-      border-radius: 0 8px 8px 0;
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-bottom: 4rem;
-    }
-
-    .wpo-note strong { color: #fff; }
-    .wpo-note code {
-      font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--accent-emerald);
-      padding: 0.15em 0.4em;
-      border-radius: 3px;
-    }
-
-    footer {
+    /* Footer */
+    .site-footer {
       border-top: 1px solid var(--border-subtle);
-      padding: 3rem 1.5rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 3.5rem 1.5rem;
+      margin-top: auto;
     }
-    footer a { color: var(--accent-emerald); text-decoration: none; }
+
+    .site-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .footer-col__title {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links-list a { font-family: var(--font-code); font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+    .footer-links-list a:hover { color: var(--accent-emerald); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2.5rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navigation -->
-  <header>
-    <nav class="lab-nav" aria-label="Navegación del laboratorio">
-      <a href="../../index.html" class="lab-nav__brand">
-        <span>← GSAP LAB</span>
-        <span class="lab-nav__badge">DEMO 03/06</span>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="../../index.html" class="site-header__brand">
+        <div class="brand-symbol">BB</div>
+        <span class="brand-title">GSAP LAB</span>
+        <span class="brand-badge">DEMO 03/06</span>
       </a>
-      <div class="lab-nav__actions">
-        <a href="README.md" class="lab-btn lab-btn--primary" target="_blank" rel="noopener">
-          Documentación
-        </a>
+
+      <nav class="desktop-nav" aria-label="Navegación de demos">
+        <a href="../01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
+        <a href="../02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
+        <a href="index.html" class="nav-pill nav-pill--active">03. Loops</a>
+        <a href="../04-suspension-viewport/index.html" class="nav-pill">04. Viewport IO</a>
+        <a href="../05-carga-condicional/index.html" class="nav-pill">05. rAF Guard</a>
+        <a href="../06-refresh-lazy-images/index.html" class="nav-pill">06. Zero CLS</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="README.md" class="btn-action" target="_blank" rel="noopener"><span>//</span> README</a>
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú de navegación" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
-    </nav>
+    </div>
   </header>
 
-  <main class="lab-container">
-    <!-- Header Block -->
-    <section class="header-block">
-      <span class="header-block__tag">Harmonic Desynchronization & Math Offsets</span>
-      <h1 class="header-block__title">Animaciones en Bucle <span>Desfasadas</span></h1>
-      <p class="header-block__lead">
-        Tres oscilaciones simultáneas independientes por elemento (traslación, rotación y escala) combinando números primos y offsets calculados por índice.
+  <!-- Mobile Drawer -->
+  <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
+    <span class="mobile-drawer__section-title">Directorio de Laboratorio</span>
+    <a href="../01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entrada 3D & CustomEase</span> <span>→</span></a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa & Scrub</span> <span>→</span></a>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>03. Bucles Armónicos Desfasados</span> <span>→</span></a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport (CPU Saver)</span> <span>→</span></a>
+    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional & Guard rAF</span> <span>→</span></a>
+    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link"><span>06. Recálculo con Imágenes & Zero CLS</span> <span>→</span></a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-emerald);"><span>← Volver al Portal Principal</span></a>
+  </div>
+
+  <main class="page-main">
+    <section class="hero-header">
+      <div class="hero-eyebrow">Harmonic Multi-axis Desynchronization</div>
+      <h1 class="hero-title">Bucles Armónicos <span>Desfasados</span></h1>
+      <p class="hero-lead">
+        Tres oscilaciones simultáneas independientes por elemento (traslación, rotación y escala) combinando números primos y offsets calculados por índice para erradicar el efecto robótico.
       </p>
     </section>
 
     <!-- Main Showcase Arena -->
-    <section class="showcase-arena" aria-label="Arena de demostración orgánica">
-      <div class="node-grid">
+    <section class="nodes-arena" aria-label="Arena de demostración orgánica">
+      <div class="nodes-grid">
         <div class="ambient-node ambient-node--circle">
-          <div class="node-inner">
-            <span class="node-inner__num">01</span>
-            <span class="node-inner__meta">ORB</span>
-          </div>
+          <div class="node-inner"><span class="node-inner__num">01</span><span class="node-inner__meta">ORB</span></div>
         </div>
         <div class="ambient-node ambient-node--square">
-          <div class="node-inner">
-            <span class="node-inner__num">02</span>
-            <span class="node-inner__meta">CUBE</span>
-          </div>
+          <div class="node-inner"><span class="node-inner__num">02</span><span class="node-inner__meta">CUBE</span></div>
         </div>
         <div class="ambient-node ambient-node--circle">
-          <div class="node-inner">
-            <span class="node-inner__num">03</span>
-            <span class="node-inner__meta">ORB</span>
-          </div>
+          <div class="node-inner"><span class="node-inner__num">03</span><span class="node-inner__meta">ORB</span></div>
         </div>
         <div class="ambient-node ambient-node--diamond">
-          <div class="node-inner">
-            <span class="node-inner__num">04</span>
-            <span class="node-inner__meta">CRYSTAL</span>
-          </div>
+          <div class="node-inner"><span class="node-inner__num">04</span><span class="node-inner__meta">CRYSTAL</span></div>
         </div>
         <div class="ambient-node ambient-node--square">
-          <div class="node-inner">
-            <span class="node-inner__num">05</span>
-            <span class="node-inner__meta">CUBE</span>
-          </div>
+          <div class="node-inner"><span class="node-inner__num">05</span><span class="node-inner__meta">CUBE</span></div>
         </div>
       </div>
     </section>
 
     <!-- Comparison Section -->
-    <section class="comparison-section" aria-label="Comparativa entre sincronizado y desfasado">
-      <!-- Bad / Synchronized -->
-      <div class="comparison-card comparison-card--bad">
-        <h3 class="comparison-card__title">
-          <span>✕</span> SIN DESFASE (Mecánico / Robótico)
-        </h3>
-        <div class="mini-row" id="syncRow">
-          <div class="mini-dot"></div>
-          <div class="mini-dot"></div>
-          <div class="mini-dot"></div>
-          <div class="mini-dot"></div>
+    <section class="comparison-grid">
+      <div class="comp-card comp-card--bad">
+        <h3 class="comp-card__title">✕ SIN DESFASE (Mecánico / Rígido)</h3>
+        <div class="comp-row" id="syncRow">
+          <div class="comp-dot"></div><div class="comp-dot"></div><div class="comp-dot"></div><div class="comp-dot"></div>
         </div>
-        <p class="comparison-desc">
-          Todos los elementos comparten la misma duración (<code>duration: 2.0s</code>). El ojo humano detecta el patrón en 1.5 segundos y lo lee como un widget artificial.
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Misma duración fija (<code>duration: 2.0s</code>). El cerebro detecta el patrón en 2 segundos y lo lee como interfaz artificial.
         </p>
       </div>
 
-      <!-- Good / Desynchronized -->
-      <div class="comparison-card comparison-card--good">
-        <h3 class="comparison-card__title">
-          <span>✓</span> CON DESFASE (Orgánico / Armónico)
-        </h3>
-        <div class="mini-row" id="desyncRow">
-          <div class="mini-dot"></div>
-          <div class="mini-dot"></div>
-          <div class="mini-dot"></div>
-          <div class="mini-dot"></div>
+      <div class="comp-card comp-card--good">
+        <h3 class="comp-card__title">✓ CON DESFASE (Orgánico / Armónico)</h3>
+        <div class="comp-row" id="desyncRow">
+          <div class="comp-dot"></div><div class="comp-dot"></div><div class="comp-dot"></div><div class="comp-dot"></div>
         </div>
-        <p class="comparison-desc">
-          Cada elemento tiene una duración diferenciada (<code>duration: 2.0 + i * 0.4s</code>). Nunca coinciden en el vértice superior simultáneamente, simulando física de partículas.
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Duraciones diferenciadas (<code>duration: 2.0 + i * 0.45s</code>). Nunca coinciden en el vértice, simulando física de partículas.
         </p>
       </div>
     </section>
-
-    <!-- WPO Note -->
-    <div class="wpo-note">
-      <strong>Por qué la matemática previene la fatiga cognitiva:</strong> Cuando varios elementos animados se mueven en perfecta sincronía, el cerebro los agrupa en un solo bloque rígido. Al introducir tres ciclos trigonométricos con duraciones primas (ej. <code>2.9s</code> para $Y$, <code>4.7s</code> para rotación y <code>5.3s</code> para escala), el ciclo completo tarda más de 70 segundos en repetirse exactamente. Todo esto ocurre a 60 FPS sin sobrecargar la CPU, gracias al uso exclusivo de <code>transform</code>.
-    </div>
   </main>
 
-  <!-- Footer -->
-  <footer>
-    <p>
-      Diseñado y desarrollado por <strong>Benjamín Brante</strong> · Arquitectura Frontend & WPO<br>
-      <a href="https://brante.dev" target="_blank" rel="noopener">brante.dev</a> · 
-      <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a>
-    </p>
+  <!-- Senior Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__container">
+      <div>
+        <div class="footer-col__title">Benjamín Brante</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
+          Desarrollador Web · Arquitectura Frontend, Seguridad & Optimización WPO en WordPress y ecosistemas Headless.
+        </p>
+      </div>
+      <div>
+        <div class="footer-col__title">Navegación</div>
+        <ul class="footer-links-list">
+          <li><a href="../../index.html">Portal Principal GSAP Lab</a></li>
+          <li><a href="../01-entrada-3d/index.html">01. Entrada 3D & CustomEase</a></li>
+          <li><a href="../04-suspension-viewport/index.html">04. Suspensión Viewport</a></li>
+          <li><a href="../06-refresh-lazy-images/index.html">06. Zero CLS con Imágenes</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col__title">Contacto & Redes</div>
+        <ul class="footer-links-list">
+          <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
+          <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Benjamín Brante Pardo. Código abierto bajo licencia MIT.</span>
+      <span>60 FPS GPU Pipeline · Zero CLS Standards</span>
+    </div>
   </footer>
 
-  <!-- GSAP Core -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script>
-    /**
-     * CONTEXTO: Oscilaciones Armónicas Desfasadas Multi-eje
-     * AUTOR: Benjamín Brante (Arquitecto Frontend)
-     */
     (() => {
       'use strict';
 
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        console.info('[GSAP Lab] Prefers-reduced-motion activo. Bucles omitidos.');
-        return;
+      const btnMenuToggle = document.getElementById('btnMenuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      if (btnMenuToggle && mobileDrawer) {
+        btnMenuToggle.addEventListener('click', () => {
+          const isOpen = mobileDrawer.classList.toggle('is-open');
+          btnMenuToggle.classList.toggle('is-open', isOpen);
+          btnMenuToggle.setAttribute('aria-expanded', isOpen);
+          mobileDrawer.setAttribute('aria-hidden', !isOpen);
+        });
       }
 
-      // --- Nodos Principales de la Arena ---
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
       const nodes = document.querySelectorAll('.ambient-node');
 
       nodes.forEach((node, i) => {
         const isDiamond = node.classList.contains('ambient-node--diamond');
         const baseRot = isDiamond ? 45 : 0;
 
-        // 1. Oscilación Vertical (Flotación Y)
+        // Y float
         gsap.to(node, {
-          y: -22,
+          y: -24,
           duration: 2.8 + i * 0.7,
           ease: 'sine.inOut',
           yoyo: true,
           repeat: -1
         });
 
-        // 2. Oscilación Rotacional (Alternando sentido por paridad de índice)
+        // Rotation
         gsap.to(node, {
           rotation: baseRot + (i % 2 === 0 ? 8 : -8),
           duration: 4.4 + i * 0.8,
@@ -467,9 +591,9 @@
           repeat: -1
         });
 
-        // 3. Oscilación de Escala (Pulsación Sutil)
+        // Scale
         gsap.to(node, {
-          scale: 1.06,
+          scale: 1.07,
           duration: 5.1 + i * 0.6,
           ease: 'sine.inOut',
           yoyo: true,
@@ -477,25 +601,13 @@
         });
       });
 
-      // --- Comparativa: Sincronizado vs Desfasado ---
-      document.querySelectorAll('#syncRow .mini-dot').forEach((el) => {
-        gsap.to(el, {
-          y: -16,
-          duration: 1.8,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1
-        });
+      // Comparison row tweens
+      document.querySelectorAll('#syncRow .comp-dot').forEach((el) => {
+        gsap.to(el, { y: -16, duration: 1.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
       });
 
-      document.querySelectorAll('#desyncRow .mini-dot').forEach((el, i) => {
-        gsap.to(el, {
-          y: -16,
-          duration: 1.8 + i * 0.45,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1
-        });
+      document.querySelectorAll('#desyncRow .comp-dot').forEach((el, i) => {
+        gsap.to(el, { y: -16, duration: 1.8 + i * 0.45, ease: 'sine.inOut', yoyo: true, repeat: -1 });
       });
     })();
   </script>

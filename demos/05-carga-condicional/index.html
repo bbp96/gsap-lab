@@ -3,496 +3,1003 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>05 — Carga Condicional y Guard de Librerías | GSAP Lab</title>
+  <title>05 — Carga Condicional & Guard con rAF | GSAP Performance Lab</title>
   <style>
     :root {
-      --bg-canvas: #0B0F17;
-      --bg-surface: #111827;
-      --bg-surface-elevated: #1F2937;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-primary: #F9FAFB;
-      --text-secondary: #9CA3AF;
-      --text-muted: #6B7280;
-      --accent-orange: #FF6B4A;
+      --bg-base: #08090C;
+      --bg-surface: #0E1117;
+      --bg-surface-elevated: #151922;
+      --bg-surface-glass: rgba(14, 17, 23, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text-main: #FFFFFF;
+      --text-muted: #8E96A4;
+      --text-dim: #545C6A;
+      --accent-coral: #E05A3E;
       --accent-emerald: #10B981;
       --accent-cyan: #06B6D4;
       --accent-violet: #8B5CF6;
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --accent-amber: #F59E0B;
+      --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-code: 'SF Mono', Monaco, Consolas, 'Liberation Mono', Menlo, monospace;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-canvas);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-ui);
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Shared Navigation */
-    .lab-nav {
+    /* Subtle Architectural Background Grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* --- RESPONSIVE HEADER & NAVIGATION DRAWER --- */
+    .site-header {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1.5rem;
-      background: rgba(11, 15, 23, 0.85);
-      backdrop-filter: blur(16px);
+      z-index: 1000;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .lab-nav__brand {
+    .site-header__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header__brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       text-decoration: none;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      font-weight: 600;
+      color: var(--text-main);
     }
 
-    .lab-nav__badge {
-      background: rgba(139, 92, 246, 0.15);
-      color: var(--accent-violet);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      font-size: 0.72rem;
-      letter-spacing: 0.05em;
-    }
-
-    .lab-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.85rem;
-      font-size: 0.8rem;
-      font-family: var(--font-mono);
-      font-weight: 500;
-      border-radius: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.2s var(--ease-out);
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
-      color: var(--text-primary);
-    }
-
-    .lab-btn:hover {
-      background: var(--bg-surface-elevated);
-      border-color: var(--accent-violet);
-      transform: translateY(-1px);
-    }
-
-    .lab-btn--primary {
-      background: var(--accent-violet);
-      color: #fff;
-      border-color: var(--accent-violet);
-      font-weight: 600;
-    }
-
-    .lab-btn--primary:hover {
-      background: #a78bfa;
+    .brand-symbol {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-coral), var(--accent-violet));
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-code);
+      font-weight: 800;
+      font-size: 0.75rem;
       color: #000;
     }
 
-    /* Container */
-    .lab-container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 7rem 1.5rem 4rem;
+    .brand-title {
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
 
-    .header-block {
-      text-align: center;
-      max-width: 720px;
-      margin: 0 auto 3rem;
-    }
-
-    .header-block__tag {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
+    .brand-badge {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.35);
       color: var(--accent-violet);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-      padding: 0.25rem 0.75rem;
-      background: rgba(139, 92, 246, 0.08);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      border-radius: 999px;
-      display: inline-block;
     }
 
-    .header-block__title {
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 1rem;
-    }
-
-    .header-block__title span {
-      background: linear-gradient(135deg, #FFFFFF 30%, var(--accent-violet) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-block__lead {
-      color: var(--text-secondary);
-      font-size: 1.05rem;
-    }
-
-    /* Interactive Simulation Controller */
-    .sim-controls {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-      flex-wrap: wrap;
-    }
-
-    .sim-btn {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      padding: 0.6rem 1.1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: all 0.2s ease;
+    /* Desktop Navigation */
+    .desktop-nav {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .sim-btn:hover {
-      border-color: var(--accent-violet);
+    @media (max-width: 900px) {
+      .desktop-nav { display: none; }
+    }
+
+    .nav-pill {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-pill:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-pill--active {
+      color: var(--accent-violet);
+      background: rgba(139, 92, 246, 0.1);
+      border-color: rgba(139, 92, 246, 0.25);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-subtle);
       background: var(--bg-surface-elevated);
+      color: var(--text-main);
+    }
+
+    .btn-action:hover {
+      border-color: var(--accent-violet);
+      background: rgba(139, 92, 246, 0.15);
       transform: translateY(-1px);
     }
 
-    .sim-btn--active {
-      background: rgba(139, 92, 246, 0.15);
-      border-color: var(--accent-violet);
-      color: var(--accent-violet);
-      font-weight: 600;
-    }
-
-    /* DevTools Terminal Console */
-    .terminal {
-      background: #0D1117;
+    /* Mobile Hamburger Button */
+    .btn-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-surface-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-      overflow: hidden;
-      margin-bottom: 3rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 8px;
     }
 
-    .terminal__header {
-      background: #161B22;
-      padding: 0.75rem 1.25rem;
+    @media (max-width: 900px) {
+      .btn-hamburger { display: flex; }
+    }
+
+    .btn-hamburger span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-hamburger.is-open span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .btn-hamburger.is-open span:nth-child(2) {
+      opacity: 0;
+    }
+    .btn-hamburger.is-open span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      position: fixed;
+      top: 57px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 57px);
+      background: rgba(8, 9, 12, 0.98);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      padding: 1.5rem;
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--transition-smooth);
+      z-index: 999;
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .terminal__dot {
-      width: 12px;
-      height: 12px;
+    .mobile-drawer.is-open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mobile-drawer__section-title {
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .mobile-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .mobile-nav-link:hover, .mobile-nav-link--active {
+      border-color: var(--accent-violet);
+      background: var(--bg-surface-elevated);
+      color: var(--accent-violet);
+    }
+
+    /* Main Container */
+    .page-main {
+      flex: 1;
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 6.5rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Editorial Hero Section */
+    .hero-header {
+      margin-bottom: 3rem;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-violet);
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #FFFFFF 40%, var(--accent-violet) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-lead {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-muted);
+      max-width: 740px;
+      line-height: 1.65;
+    }
+
+    /* Simulation Control Board */
+    .sim-board {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .sim-board__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .sim-board__title {
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sim-board__title::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-violet);
+      box-shadow: 0 0 10px var(--accent-violet);
+    }
+
+    .sim-modes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .sim-chip {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      color: var(--text-main);
+    }
+
+    .sim-chip:hover {
+      border-color: var(--accent-violet);
+      transform: translateY(-2px);
+    }
+
+    .sim-chip.is-selected {
+      border-color: var(--accent-violet);
+      background: rgba(139, 92, 246, 0.12);
+      box-shadow: 0 0 20px -5px rgba(139, 92, 246, 0.3);
+    }
+
+    .sim-chip__name {
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .sim-chip__sub {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* DevTools Terminal */
+    .terminal-container {
+      background: #090B10;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.8);
+    }
+
+    .terminal-header {
+      background: #11141D;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .terminal-dots span {
+      width: 11px;
+      height: 11px;
       border-radius: 50%;
     }
-    .terminal__dot--red { background: #FF5F56; }
-    .terminal__dot--yellow { background: #FFBD2E; }
-    .terminal__dot--green { background: #27C93F; }
+    .dot-red { background: #EF4444; }
+    .dot-yellow { background: #F59E0B; }
+    .dot-green { background: #10B981; }
 
-    .terminal__title {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
+    .terminal-title {
+      font-family: var(--font-code);
+      font-size: 0.74rem;
       color: var(--text-muted);
-      margin-left: 0.5rem;
     }
 
-    .terminal__body {
-      padding: 1.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      min-height: 240px;
-      max-height: 320px;
+    .terminal-body {
+      padding: 1.25rem 1.5rem;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      min-height: 220px;
+      max-height: 280px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.35rem;
+      line-height: 1.5;
     }
 
-    .log-line {
+    .t-row {
       display: flex;
       gap: 0.75rem;
       opacity: 0;
-      animation: fadeInLog 0.2s forwards;
+      animation: tFade 0.2s forwards;
     }
 
-    @keyframes fadeInLog {
-      to { opacity: 1; }
-    }
+    @keyframes tFade { to { opacity: 1; } }
 
-    .log-time { color: var(--text-muted); }
-    .log-info { color: #9CA3AF; }
-    .log-wait { color: #FBBF24; }
-    .log-ok { color: var(--accent-emerald); font-weight: 600; }
-    .log-tag { color: var(--accent-cyan); }
+    .t-stamp { color: var(--text-dim); }
+    .t-info { color: var(--text-muted); }
+    .t-wait { color: var(--accent-amber); font-weight: 500; }
+    .t-success { color: var(--accent-emerald); font-weight: 700; }
+    .t-error { color: #EF4444; font-weight: 700; }
+    .t-cyan { color: var(--accent-cyan); }
 
-    /* Target Animated Node */
-    .target-container {
+    /* Live Output Arena */
+    .execution-stage {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4rem;
-    }
-
-    .target-card {
-      width: 100%;
-      max-width: 420px;
-      padding: 2rem;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
       text-align: center;
-      opacity: 0;
-      transform: translateY(20px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
     }
 
-    .target-card__badge {
-      font-family: var(--font-mono);
+    .stage-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 2.2rem 1.8rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translateY(24px) scale(0.96);
+      will-change: transform, opacity;
+    }
+
+    .stage-card__badge {
+      font-family: var(--font-code);
       font-size: 0.72rem;
+      font-weight: 700;
       color: var(--accent-emerald);
-      background: rgba(16, 185, 129, 0.1);
-      padding: 0.2rem 0.6rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.25rem 0.65rem;
       border-radius: 4px;
       display: inline-block;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.85rem;
     }
 
-    .target-card__title {
-      font-size: 1.25rem;
+    .stage-card__title {
+      font-size: 1.35rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
 
-    /* WPO Note */
-    .wpo-note {
-      padding: 1.75rem 2rem;
-      border-left: 3px solid var(--accent-violet);
-      background: rgba(139, 92, 246, 0.05);
-      border-radius: 0 8px 8px 0;
+    .stage-card__desc {
       font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-bottom: 4rem;
-    }
-
-    .wpo-note strong { color: #fff; }
-    .wpo-note code {
-      font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--accent-violet);
-      padding: 0.15em 0.4em;
-      border-radius: 3px;
-    }
-
-    footer {
-      border-top: 1px solid var(--border-subtle);
-      padding: 3rem 1.5rem;
-      text-align: center;
-      font-size: 0.85rem;
       color: var(--text-muted);
+      line-height: 1.6;
     }
-    footer a { color: var(--accent-violet); text-decoration: none; }
+
+    /* Tabs & Code Inspector */
+    .inspector-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 4rem;
+      overflow: hidden;
+    }
+
+    .inspector-tabs {
+      display: flex;
+      background: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.5rem 1rem 0;
+      gap: 0.5rem;
+    }
+
+    .inspector-tab {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      padding: 0.6rem 1.1rem;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: all 0.2s ease;
+    }
+
+    .inspector-tab.is-active {
+      color: var(--text-main);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      font-weight: 600;
+    }
+
+    .inspector-content {
+      padding: 1.75rem;
+    }
+
+    .code-block {
+      background: #090B10;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      color: var(--accent-cyan);
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      padding: 3.5rem 1.5rem;
+      margin-top: auto;
+    }
+
+    .site-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .footer-col__title {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-links-list a {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links-list a:hover {
+      color: var(--accent-violet);
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2.5rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navigation -->
-  <header>
-    <nav class="lab-nav" aria-label="Navegación del laboratorio">
-      <a href="../../index.html" class="lab-nav__brand">
-        <span>← GSAP LAB</span>
-        <span class="lab-nav__badge">DEMO 05/06</span>
+  <!-- Responsive Site Header -->
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="../../index.html" class="site-header__brand">
+        <div class="brand-symbol">BB</div>
+        <span class="brand-title">GSAP LAB</span>
+        <span class="brand-badge">DEMO 05/06</span>
       </a>
-      <div class="lab-nav__actions">
-        <a href="README.md" class="lab-btn lab-btn--primary" target="_blank" rel="noopener">
-          Documentación
+
+      <!-- Desktop Navigation Menu -->
+      <nav class="desktop-nav" aria-label="Navegación de demos">
+        <a href="../01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
+        <a href="../02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
+        <a href="../03-loops-desfasados/index.html" class="nav-pill">03. Loops</a>
+        <a href="../04-suspension-viewport/index.html" class="nav-pill">04. Viewport IO</a>
+        <a href="index.html" class="nav-pill nav-pill--active">05. rAF Guard</a>
+        <a href="../06-refresh-lazy-images/index.html" class="nav-pill">06. Zero CLS</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="README.md" class="btn-action" target="_blank" rel="noopener">
+          <span>//</span> README
         </a>
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú de navegación" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
-    </nav>
+    </div>
   </header>
 
-  <main class="lab-container">
-    <!-- Header -->
-    <section class="header-block">
-      <span class="header-block__tag">Frame-Accurate Dependency Guard</span>
-      <h1 class="header-block__title">Carga Condicional & <span>Guard con rAF</span></h1>
-      <p class="header-block__lead">
-        Eliminación total del anti-patrón <code>setTimeout</code> para scripts asíncronos. Verificación sincronizada con el ciclo de refresco de pantalla mediante <code>requestAnimationFrame</code>.
+  <!-- Mobile Drawer Menu -->
+  <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
+    <span class="mobile-drawer__section-title">Directorio de Laboratorio</span>
+    <a href="../01-entrada-3d/index.html" class="mobile-nav-link">
+      <span>01. Entrada 3D & CustomEase</span> <span>→</span>
+    </a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link">
+      <span>02. Parallax Multicapa & Scrub</span> <span>→</span>
+    </a>
+    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link">
+      <span>03. Bucles Armónicos Desfasados</span> <span>→</span>
+    </a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link">
+      <span>04. Suspensión Viewport (CPU Saver)</span> <span>→</span>
+    </a>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active">
+      <span>05. Carga Condicional & Guard rAF</span> <span>→</span>
+    </a>
+    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link">
+      <span>06. Recálculo con Imágenes & Zero CLS</span> <span>→</span>
+    </a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-violet);">
+      <span>← Volver al Portal Principal</span>
+    </a>
+  </div>
+
+  <!-- Main Page -->
+  <main class="page-main">
+    <section class="hero-header">
+      <div class="hero-eyebrow">Frame-Accurate Dependency Verification</div>
+      <h1 class="hero-title">Carga Condicional & <span>Guard con rAF</span></h1>
+      <p class="hero-lead">
+        Resolución de condiciones de carrera en scripts asíncronos sin utilizar <code>setTimeout</code> arbitrario. Sincronización al frame exacto mediante <code>requestAnimationFrame</code>.
       </p>
     </section>
 
-    <!-- Simulation Controls -->
-    <div class="sim-controls" aria-label="Controlador de simulación de latencia de red">
-      <button class="sim-btn" data-delay="300" id="btnFast">
-        ⚡ Simular Red Rápida (300ms)
-      </button>
-      <button class="sim-btn sim-btn--active" data-delay="900" id="btnSlow">
-        ⏳ Simular Red Lenta (900ms)
-      </button>
-      <button class="sim-btn" data-delay="0" id="btnInstant">
-        🚀 Simular Caché Local (0ms)
-      </button>
-    </div>
-
-    <!-- DevTools Terminal -->
-    <section class="terminal" aria-label="Consola DevTools de ejecución">
-      <div class="terminal__header">
-        <div class="terminal__dot terminal__dot--red"></div>
-        <div class="terminal__dot terminal__dot--yellow"></div>
-        <div class="terminal__dot terminal__dot--green"></div>
-        <span class="terminal__title">guard-telemetry.js — Terminal de Diagnóstico</span>
+    <!-- Simulation Board Controller -->
+    <section class="sim-board" aria-label="Panel de Simulación de Red">
+      <div class="sim-board__header">
+        <h2 class="sim-board__title">Controlador de Escenario de Red</h2>
+        <span style="font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim);">
+          Haz clic en cualquier escenario para reiniciar la prueba
+        </span>
       </div>
-      <div class="terminal__body" id="terminalBody">
-        <!-- Dynamic logs -->
+
+      <div class="sim-modes-grid">
+        <button class="sim-chip" data-mode="fast" data-delay="300">
+          <span class="sim-chip__name">⚡ Fast 3G</span>
+          <span class="sim-chip__sub">Latencia simulada: 300 ms</span>
+        </button>
+
+        <button class="sim-chip is-selected" data-mode="slow" data-delay="1200">
+          <span class="sim-chip__name">⏳ Slow 3G</span>
+          <span class="sim-chip__sub">Latencia simulada: 1200 ms</span>
+        </button>
+
+        <button class="sim-chip" data-mode="cache" data-delay="0">
+          <span class="sim-chip__name">🚀 Caché Inmediata</span>
+          <span class="sim-chip__sub">Latencia simulada: 0 ms</span>
+        </button>
+
+        <button class="sim-chip" data-mode="fail" data-delay="-1">
+          <span class="sim-chip__name">⚠️ Fallo de Red (404)</span>
+          <span class="sim-chip__sub">Timeout de seguridad (Fail-safe)</span>
+        </button>
       </div>
     </section>
 
-    <!-- Target Animated Card -->
-    <div class="target-container">
-      <div class="target-card" id="targetCard">
-        <span class="target-card__badge">✓ PIPELINE CONECTADO</span>
-        <h2 class="target-card__title">Animación Ejecutada con Éxito</h2>
-        <p style="font-size: 0.9rem; color: var(--text-secondary);">
-          GSAP fue verificado de forma no-bloqueante sin errores de <code>is not defined</code> ni tiempos de espera residuales.
+    <!-- DevTools Diagnostic Terminal -->
+    <section class="terminal-container" aria-label="Terminal de Telemetría">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="dot-red"></span>
+          <span class="dot-yellow"></span>
+          <span class="dot-green"></span>
+        </div>
+        <span class="terminal-title">guard-telemetry.js — Pipeline de Sincronización</span>
+      </div>
+      <div class="terminal-body" id="termOutput"></div>
+    </section>
+
+    <!-- Visual Output Execution Stage -->
+    <section class="execution-stage" aria-label="Escenario de Ejecución">
+      <div class="stage-card" id="stageCard">
+        <span class="stage-card__badge" id="stageBadge">✓ PIPELINE CONECTADO</span>
+        <h3 class="stage-card__title" id="stageTitle">Animación Renderizada</h3>
+        <p class="stage-card__desc" id="stageDesc">
+          El script consumidor ejecutó la mutación visual en el frame exacto de disponibilidad sin provocar excepciones de ejecución.
         </p>
       </div>
-    </div>
+    </section>
 
-    <!-- WPO Note -->
-    <div class="wpo-note">
-      <strong>Por qué <code>setTimeout</code> es un anti-patrón arquitectónico:</strong>
-      Un retardo fijo de <code>setTimeout(fn, 300)</code> introduce un dilema destructivo: si el usuario está en una conexión 3G lenta, 300 ms no bastan y el script colapsa con <code>ReferenceError: gsap is not defined</code>; si la librería ya estaba en caché, se introdujeron 300 ms de latencia innecesaria. El guard con <code>requestAnimationFrame</code> resuelve la condición de carrera en el frame exacto de disponibilidad.
-    </div>
+    <!-- Code & Architecture Inspector -->
+    <section class="inspector-card" aria-label="Especificación Técnica">
+      <div class="inspector-tabs">
+        <button class="inspector-tab is-active">Patrón de Guard Senior (ES6)</button>
+      </div>
+      <div class="inspector-content">
+        <pre class="code-block"><code>/**
+ * Patrón Senior: Guard no-bloqueante con límite de seguridad (Fail-Safe)
+ * Erradica setTimeout(fn, 300) y previene bloqueos por 404
+ */
+function initWhenReady(maxWaitFrames = 240) {
+  let frameCount = 0;
+
+  function check() {
+    frameCount++;
+
+    // 1. Verificación en runtime del módulo
+    if (typeof window.gsap !== 'undefined') {
+      return executeModule(window.gsap);
+    }
+
+    // 2. Fail-Safe: Abortar si supera el umbral de espera (~4 segundos)
+    if (frameCount > maxWaitFrames) {
+      console.warn('[Guard] Dependencia no disponible tras timeout. Degradación segura.');
+      return renderFallbackState();
+    }
+
+    // 3. Reintentar en el siguiente ciclo de refresco
+    requestAnimationFrame(check);
+  }
+
+  requestAnimationFrame(check);
+}</code></pre>
+      </div>
+    </section>
   </main>
 
-  <!-- Footer -->
-  <footer>
-    <p>
-      Diseñado y desarrollado por <strong>Benjamín Brante</strong> · Arquitectura Frontend & WPO<br>
-      <a href="https://brante.dev" target="_blank" rel="noopener">brante.dev</a> · 
-      <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a>
-    </p>
+  <!-- Senior Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__container">
+      <div>
+        <div class="footer-col__title">Benjamín Brante</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
+          Desarrollador Web · Arquitectura Frontend, Seguridad & Optimización WPO en WordPress y ecosistemas Headless.
+        </p>
+      </div>
+      <div>
+        <div class="footer-col__title">Navegación</div>
+        <ul class="footer-links-list">
+          <li><a href="../../index.html">Portal Principal GSAP Lab</a></li>
+          <li><a href="../01-entrada-3d/index.html">01. Entrada 3D & CustomEase</a></li>
+          <li><a href="../04-suspension-viewport/index.html">04. Suspensión Viewport</a></li>
+          <li><a href="../06-refresh-lazy-images/index.html">06. Zero CLS con Imágenes</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col__title">Contacto & Redes</div>
+        <ul class="footer-links-list">
+          <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
+          <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Benjamín Brante Pardo. Código abierto bajo licencia MIT.</span>
+      <span>60 FPS GPU Pipeline · Zero CLS Standards</span>
+    </div>
   </footer>
 
-  <!-- Script Logic -->
+  <!-- Real GSAP Core for stage card -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <!-- Sandbox Logic & Mobile Menu Handler -->
   <script>
     /**
-     * CONTEXTO: Guard de Carga Asíncrona con requestAnimationFrame
+     * CONTEXTO: Guard de Carga Asíncrona con Sandbox de Simulación Aislado
      * AUTOR: Benjamín Brante (Arquitecto Frontend)
      */
     (() => {
       'use strict';
 
-      const terminal = document.getElementById('terminalBody');
-      const targetCard = document.getElementById('targetCard');
-      let currentScript = null;
-      let isChecking = false;
+      // --- 1. Mobile Menu Drawer Handler ---
+      const btnMenuToggle = document.getElementById('btnMenuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+
+      if (btnMenuToggle && mobileDrawer) {
+        btnMenuToggle.addEventListener('click', () => {
+          const isOpen = mobileDrawer.classList.toggle('is-open');
+          btnMenuToggle.classList.toggle('is-open', isOpen);
+          btnMenuToggle.setAttribute('aria-expanded', isOpen);
+          mobileDrawer.setAttribute('aria-hidden', !isOpen);
+        });
+      }
+
+      // --- 2. Isolated Stateful Sandbox Loader ---
+      const terminal = document.getElementById('termOutput');
+      const stageCard = document.getElementById('stageCard');
+      const stageBadge = document.getElementById('stageBadge');
+      const stageTitle = document.getElementById('stageTitle');
+      const stageDesc = document.getElementById('stageDesc');
+      const simChips = document.querySelectorAll('.sim-chip');
+
+      let currentSimulationId = 0;
+      let activeRafId = null;
+      let activeTimeoutId = null;
 
       const log = (msg, type = 'info') => {
-        const line = document.createElement('div');
-        line.className = 'log-line';
+        const row = document.createElement('div');
+        row.className = 't-row';
         const time = new Date().toISOString().substring(11, 23);
-        
-        let typeClass = 'log-info';
-        if (type === 'wait') typeClass = 'log-wait';
-        if (type === 'ok') typeClass = 'log-ok';
-        if (type === 'tag') typeClass = 'log-tag';
 
-        line.innerHTML = `<span class="log-time">[${time}]</span> <span class="${typeClass}">${msg}</span>`;
-        terminal.appendChild(line);
+        let typeClass = 't-info';
+        if (type === 'wait') typeClass = 't-wait';
+        if (type === 'success') typeClass = 't-success';
+        if (type === 'error') typeClass = 't-error';
+        if (type === 'cyan') typeClass = 't-cyan';
+
+        row.innerHTML = `<span class="t-stamp">[${time}]</span> <span class="${typeClass}">${msg}</span>`;
+        terminal.appendChild(row);
         terminal.scrollTop = terminal.scrollHeight;
       };
 
-      const runSimulation = (networkDelayMs) => {
-        // Reset state
+      const startSimulation = (latencyMs) => {
+        currentSimulationId++;
+        const simId = currentSimulationId;
+
+        // Cancel previous cycles
+        if (activeRafId) cancelAnimationFrame(activeRafId);
+        if (activeTimeoutId) clearTimeout(activeTimeoutId);
+
+        // Reset UI
         terminal.innerHTML = '';
         if (window.gsap) {
-          targetCard.style.opacity = '0';
-          targetCard.style.transform = 'translateY(20px)';
+          gsap.killTweensOf(stageCard);
+          gsap.set(stageCard, { opacity: 0, y: 24, scale: 0.96 });
         }
 
-        log(`> Iniciando script inline consumidor...`, 'tag');
-        log(`> Simulando inyección de dependencia (Latencia: ${networkDelayMs} ms)...`, 'info');
-
-        let framesChecked = 0;
+        // Sandbox simulated registry
+        let isModuleAvailable = false;
+        let frameCount = 0;
         const startTime = performance.now();
+        const maxFrames = 180; // ~3 segundos de espera máxima
 
-        // 1. EL GUARD: Verificación frame a frame sin setTimeout
-        const checkDependency = () => {
-          framesChecked += 1;
+        if (latencyMs === -1) {
+          log(`> [Iniciando] Modo Simulación: Fallo de Red / Error 404`, 'cyan');
+          log(`> Escuchando canal de dependencia con guard rAF...`, 'info');
+        } else {
+          log(`> [Iniciando] Modo Simulación: Latencia de Red ${latencyMs} ms`, 'cyan');
+          log(`> Consumidor ejecutándose. Esperando disponibilidad del módulo...`, 'info');
+        }
 
-          if (typeof window.gsap === 'undefined') {
-            if (framesChecked === 1 || framesChecked % 20 === 0) {
-              log(`> [Frame #${framesChecked}] 'gsap' no disponible aún. Reintentando en siguiente rAF...`, 'wait');
+        // Programar la llegada asíncrona simulada
+        if (latencyMs >= 0) {
+          activeTimeoutId = setTimeout(() => {
+            if (simId === currentSimulationId) {
+              isModuleAvailable = true;
+              log(`> [Evento Red] Paquete descargado y parseado en memoria`, 'cyan');
             }
-            return requestAnimationFrame(checkDependency);
+          }, latencyMs);
+        }
+
+        // EL GUARD DE FRAME: Se ejecuta estrictamente por rAF
+        const guardLoop = () => {
+          if (simId !== currentSimulationId) return; // Validación de ciclo obsoleto
+          frameCount++;
+
+          if (isModuleAvailable) {
+            const elapsed = (performance.now() - startTime).toFixed(1);
+            log(`> [Frame #${frameCount}] Módulo GSAP validado tras ${elapsed} ms`, 'success');
+            log(`> Ejecutando pipeline de renderizado seguro con GPU Matrix...`, 'success');
+
+            // Renderizado exitoso
+            stageBadge.textContent = `✓ CARGADO TRAS ${elapsed} MS (FRAME #${frameCount})`;
+            stageBadge.style.color = 'var(--accent-emerald)';
+            stageBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            stageBadge.style.background = 'rgba(16, 185, 129, 0.12)';
+            stageTitle.textContent = 'Animación Ejecutada con Éxito';
+            stageDesc.textContent = `GSAP fue verificado de forma no-bloqueante sin errores de 'is not defined' ni tiempos de espera muertos.`;
+
+            if (window.gsap) {
+              gsap.to(stageCard, {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.8,
+                ease: 'power3.out'
+              });
+            }
+            return;
           }
 
-          const totalTime = (performance.now() - startTime).toFixed(1);
-          log(`> [Frame #${framesChecked}] ¡GSAP detectado exitosamente tras ${totalTime} ms!`, 'ok');
-          log(`> Ejecutando animación con GPU transform seguro...`, 'ok');
+          // Verificación de Timeout Defensivo
+          if (frameCount >= maxFrames) {
+            log(`> [Frame #${frameCount}] ERROR: Tiempo de espera agotado (Timeout)`, 'error');
+            log(`> [Fail-Safe] Activando degradación elegante (Fallback visual sin JS)`, 'error');
 
-          // Ejecutar animación GSAP de forma segura
-          window.gsap.to(targetCard, {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            ease: 'power3.out'
-          });
+            stageBadge.textContent = `⚠️ DEGRADACIÓN ELEGANTE (FALLO CONTROLADO)`;
+            stageBadge.style.color = '#EF4444';
+            stageBadge.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            stageBadge.style.background = 'rgba(239, 68, 68, 0.12)';
+            stageTitle.textContent = 'Estado de Fallback Activado';
+            stageDesc.textContent = `La librería no cargó en la red, pero el sistema capturó el evento y mostró la información accesible sin bloquear la página.`;
+
+            if (window.gsap) {
+              gsap.to(stageCard, { opacity: 1, y: 0, scale: 1, duration: 0.4 });
+            }
+            return;
+          }
+
+          // Logging periódico de sondeo
+          if (frameCount === 1 || frameCount % 25 === 0) {
+            log(`> [Frame #${frameCount}] Sondeo activo: módulo no listo. Reintentando en siguiente tick...`, 'wait');
+          }
+
+          activeRafId = requestAnimationFrame(guardLoop);
         };
 
-        // Iniciar polling
-        requestAnimationFrame(checkDependency);
-
-        // 2. Simulación de carga asíncrona mediante tag de script
-        setTimeout(() => {
-          if (!document.getElementById('gsapScriptTag')) {
-            const script = document.createElement('script');
-            script.id = 'gsapScriptTag';
-            script.src = 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js';
-            document.head.appendChild(script);
-            log(`> Evento de red: <script> descargado e inyectado al DOM`, 'tag');
-          }
-        }, networkDelayMs);
+        activeRafId = requestAnimationFrame(guardLoop);
       };
 
-      // Inicialización por defecto con 900ms
-      runSimulation(900);
+      // Inicialización por defecto
+      startSimulation(1200);
 
-      // Botones interactivos
-      const buttons = document.querySelectorAll('.sim-btn');
-      buttons.forEach((btn) => {
-        btn.addEventListener('click', () => {
-          buttons.forEach(b => b.classList.remove('sim-btn--active'));
-          btn.classList.add('sim-btn--active');
-          const delay = parseInt(btn.dataset.delay, 10);
-          runSimulation(delay);
+      // Eventos de selección de escenario
+      simChips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          simChips.forEach(c => c.classList.remove('is-selected'));
+          chip.classList.add('is-selected');
+          const delay = parseInt(chip.dataset.delay, 10);
+          startSimulation(delay);
         });
       });
     })();

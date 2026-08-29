@@ -6,147 +6,305 @@
   <title>GSAP Performance Lab — Arquitectura de Animación Web & WPO | Benjamín Brante</title>
   <style>
     :root {
-      --bg-canvas: #0B0F17;
-      --bg-surface: #111827;
-      --bg-surface-elevated: #1F2937;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(255, 107, 74, 0.5);
-      --text-primary: #F9FAFB;
-      --text-secondary: #9CA3AF;
-      --text-muted: #6B7280;
-      --accent-orange: #FF6B4A;
+      --bg-base: #08090C;
+      --bg-surface: #0E1117;
+      --bg-surface-elevated: #151922;
+      --bg-surface-glass: rgba(14, 17, 23, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text-main: #FFFFFF;
+      --text-muted: #8E96A4;
+      --text-dim: #545C6A;
+      --accent-coral: #E05A3E;
       --accent-emerald: #10B981;
       --accent-cyan: #06B6D4;
       --accent-violet: #8B5CF6;
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --accent-lime: #D4F66C;
+      --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-code: 'SF Mono', Monaco, Consolas, 'Liberation Mono', Menlo, monospace;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-canvas);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-ui);
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Ambient Background Glow */
-    .ambient-glow {
+    body::before {
+      content: '';
       position: fixed;
-      top: -150px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(255, 107, 74, 0.12) 0%, rgba(139, 92, 246, 0.06) 50%, transparent 70%);
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
     }
 
-    .wrap {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 4rem 1.5rem 6rem;
-      position: relative;
-      z-index: 1;
-    }
-
     /* Header */
-    header {
-      margin-bottom: 4rem;
-      padding-bottom: 2.5rem;
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .badge-bar {
+    .site-header__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header__brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
+      text-decoration: none;
+      color: var(--text-main);
     }
 
-    .tag-pill {
-      font-family: var(--font-mono);
+    .brand-symbol {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-coral), var(--accent-cyan));
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-code);
+      font-weight: 800;
       font-size: 0.75rem;
-      color: var(--accent-orange);
-      background: rgba(255, 107, 74, 0.1);
-      border: 1px solid rgba(255, 107, 74, 0.25);
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      color: #000;
     }
 
-    .tag-pill--repo {
-      color: var(--accent-cyan);
-      background: rgba(6, 182, 212, 0.1);
-      border-color: rgba(6, 182, 212, 0.25);
+    .brand-title { font-family: var(--font-code); font-size: 0.85rem; font-weight: 700; }
+    .brand-badge {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(224, 90, 62, 0.15);
+      border: 1px solid rgba(224, 90, 62, 0.35);
+      color: var(--accent-coral);
+    }
+
+    .desktop-nav { display: flex; align-items: center; gap: 0.5rem; }
+    @media (max-width: 900px) { .desktop-nav { display: none; } }
+
+    .nav-pill {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
       text-decoration: none;
       transition: all 0.2s ease;
     }
 
-    .tag-pill--repo:hover {
-      background: rgba(6, 182, 212, 0.2);
+    .nav-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+    }
+
+    .btn-action:hover {
+      border-color: var(--accent-coral);
+      background: rgba(224, 90, 62, 0.15);
       transform: translateY(-1px);
     }
 
-    h1 {
-      font-size: clamp(2.2rem, 5.5vw, 3.8rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
+    .btn-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    @media (max-width: 900px) { .btn-hamburger { display: flex; } }
+
+    .btn-hamburger span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-hamburger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .btn-hamburger.is-open span:nth-child(2) { opacity: 0; }
+    .btn-hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      position: fixed;
+      top: 57px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 57px);
+      background: rgba(8, 9, 12, 0.98);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--transition-smooth);
+      z-index: 999;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .mobile-drawer.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-drawer__section-title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+
+    .mobile-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .mobile-nav-link:hover {
+      border-color: var(--accent-coral);
+      background: var(--bg-surface-elevated);
+      color: var(--accent-coral);
+    }
+
+    /* Main Container */
+    .page-main {
+      flex: 1;
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 6.5rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Hero Section */
+    .hero-header { margin-bottom: 3.5rem; }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-coral);
+      background: rgba(224, 90, 62, 0.08);
+      border: 1px solid rgba(224, 90, 62, 0.2);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
       margin-bottom: 1.25rem;
     }
 
-    h1 span {
-      background: linear-gradient(135deg, #FFFFFF 30%, var(--accent-orange) 80%, var(--accent-violet) 100%);
+    .hero-title {
+      font-size: clamp(2.3rem, 5.5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #FFFFFF 30%, var(--accent-coral) 80%, var(--accent-cyan) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .lead-text {
-      font-size: clamp(1.05rem, 2vw, 1.2rem);
-      color: var(--text-secondary);
-      max-width: 760px;
-      line-height: 1.7;
+    .hero-lead {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 780px;
+      line-height: 1.65;
     }
 
-    /* Quality Metrics Grid */
-    .metrics-bar {
+    /* Metrics Bar */
+    .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.25rem;
+      gap: 1rem;
       margin-bottom: 3.5rem;
     }
 
-    .metric-pill {
+    .metric-box {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.4rem;
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
     }
 
-    .metric-pill__val {
-      font-family: var(--font-mono);
-      font-size: 1.25rem;
+    .metric-box__val {
+      font-family: var(--font-code);
+      font-size: 1.3rem;
       font-weight: 800;
-      color: #fff;
     }
 
-    .metric-pill__label {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--text-muted);
+    .metric-box__label {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      color: var(--text-dim);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
     /* Demos Grid */
@@ -160,14 +318,14 @@
     .demo-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 14px;
+      border-radius: var(--radius-lg);
       padding: 2rem 1.75rem;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.25s var(--ease-out);
+      transition: all 0.25s var(--transition-smooth);
       position: relative;
       overflow: hidden;
     }
@@ -179,26 +337,24 @@
       left: 0;
       width: 100%;
       height: 3px;
-      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-orange)), transparent);
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-coral)), transparent);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
     .demo-card:hover {
       background: var(--bg-surface-elevated);
-      border-color: var(--card-accent, var(--accent-orange));
+      border-color: var(--card-accent, var(--accent-coral));
       transform: translateY(-3px);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
     }
 
-    .demo-card:hover::before {
-      opacity: 1;
-    }
+    .demo-card:hover::before { opacity: 1; }
 
-    .demo-card--01 { --card-accent: var(--accent-orange); }
+    .demo-card--01 { --card-accent: var(--accent-coral); }
     .demo-card--02 { --card-accent: var(--accent-cyan); }
     .demo-card--03 { --card-accent: var(--accent-emerald); }
-    .demo-card--04 { --card-accent: var(--accent-orange); }
+    .demo-card--04 { --card-accent: var(--accent-coral); }
     .demo-card--05 { --card-accent: var(--accent-violet); }
     .demo-card--06 { --card-accent: var(--accent-emerald); }
 
@@ -210,32 +366,31 @@
     }
 
     .demo-card__num {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--card-accent);
-      background: rgba(255, 255, 255, 0.05);
-      padding: 0.2rem 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.2rem 0.55rem;
       border-radius: 4px;
     }
 
     .demo-card__tech {
-      font-family: var(--font-mono);
+      font-family: var(--font-code);
       font-size: 0.7rem;
-      color: var(--text-muted);
+      color: var(--text-dim);
     }
 
     .demo-card__title {
       font-size: 1.3rem;
       font-weight: 700;
-      color: #fff;
       margin-bottom: 0.6rem;
       line-height: 1.3;
     }
 
     .demo-card__desc {
       font-size: 0.9rem;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       line-height: 1.6;
       margin-bottom: 1.5rem;
     }
@@ -246,131 +401,164 @@
       align-items: center;
       padding-top: 1rem;
       border-top: 1px solid var(--border-subtle);
-      font-family: var(--font-mono);
+      font-family: var(--font-code);
       font-size: 0.78rem;
       font-weight: 600;
       color: var(--card-accent);
     }
 
-    .demo-card__arrow {
-      transition: transform 0.2s ease;
-    }
-
-    .demo-card:hover .demo-card__arrow {
-      transform: translateX(4px);
-    }
-
-    /* Principles Section */
-    .principles-box {
+    /* Architecture Standards Matrix */
+    .standards-box {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 16px;
+      border-radius: var(--radius-lg);
       padding: 3rem 2.5rem;
       margin-bottom: 4rem;
     }
 
-    .principles-box h2 {
+    .standards-box h2 {
       font-size: 1.6rem;
       font-weight: 800;
-      margin-bottom: 1.5rem;
-      color: #fff;
+      margin-bottom: 1.75rem;
     }
 
-    .principles-grid {
+    .standards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 2rem;
     }
 
-    .principle-item h3 {
+    .standard-item h3 {
       font-size: 1.05rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
       color: var(--accent-cyan);
     }
 
-    .principle-item p {
+    .standard-item p {
       font-size: 0.88rem;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       line-height: 1.5;
     }
 
     /* Footer */
-    footer {
-      padding-top: 3rem;
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      padding: 3.5rem 1.5rem;
+      margin-top: auto;
+    }
+
+    .site-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .footer-col__title {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links-list a { font-family: var(--font-code); font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+    .footer-links-list a:hover { color: var(--accent-coral); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2.5rem auto 0;
+      padding-top: 1.5rem;
       border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 1.5rem;
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-
-    .author-info strong {
-      color: #fff;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .footer-links a {
-      color: var(--accent-orange);
-      text-decoration: none;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-    }
-
-    .footer-links a:hover {
-      text-decoration: underline;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
     }
   </style>
 </head>
 <body>
 
-  <div class="ambient-glow"></div>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="index.html" class="site-header__brand">
+        <div class="brand-symbol">BB</div>
+        <span class="brand-title">GSAP LAB</span>
+        <span class="brand-badge">PORTAFOLIO WPO</span>
+      </a>
 
-  <div class="wrap">
-    <!-- Header -->
-    <header>
-      <div class="badge-bar">
-        <span class="tag-pill">GSAP PERFORMANCE LAB</span>
-        <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener" class="tag-pill tag-pill--repo">
-          ★ GitHub: bbp96/gsap-lab
+      <nav class="desktop-nav" aria-label="Navegación de demos">
+        <a href="demos/01-entrada-3d/index.html" class="nav-pill">01. 3D Entry</a>
+        <a href="demos/02-parallax-multicapa/index.html" class="nav-pill">02. Parallax</a>
+        <a href="demos/03-loops-desfasados/index.html" class="nav-pill">03. Loops</a>
+        <a href="demos/04-suspension-viewport/index.html" class="nav-pill">04. Viewport IO</a>
+        <a href="demos/05-carga-condicional/index.html" class="nav-pill">05. rAF Guard</a>
+        <a href="demos/06-refresh-lazy-images/index.html" class="nav-pill">06. Zero CLS</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="https://github.com/bbp96/gsap-lab" class="btn-action" target="_blank" rel="noopener">
+          <span>★</span> GitHub
         </a>
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú de navegación" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
-      <h1>Técnicas de Animación Web con <span>Foco en Rendimiento</span></h1>
-      <p class="lead-text">
-        Colección de módulos autocontenidos de ingeniería frontend con <strong>GSAP 3.12.5</strong> y <strong>ScrollTrigger</strong>. Cada demo demuestra no solo la técnica visual, sino la arquitectura para preservar 60 FPS estables y cero sobrecarga de CPU/batería en dispositivos móviles.
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
+    <span class="mobile-drawer__section-title">Directorio de Laboratorio</span>
+    <a href="demos/01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entrada 3D & CustomEase</span> <span>→</span></a>
+    <a href="demos/02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa & Scrub</span> <span>→</span></a>
+    <a href="demos/03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos Desfasados</span> <span>→</span></a>
+    <a href="demos/04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport (CPU Saver)</span> <span>→</span></a>
+    <a href="demos/05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional & Guard rAF</span> <span>→</span></a>
+    <a href="demos/06-refresh-lazy-images/index.html" class="mobile-nav-link"><span>06. Recálculo con Imágenes & Zero CLS</span> <span>→</span></a>
+  </div>
+
+  <main class="page-main">
+    <section class="hero-header">
+      <div class="hero-eyebrow">Creative Engineering & Web Performance Optimization</div>
+      <h1 class="hero-title">Técnicas de Animación Web con <span>Foco en Rendimiento</span></h1>
+      <p class="hero-lead">
+        Módulos de ingeniería frontend con <strong>GSAP 3.12.5</strong> y <strong>ScrollTrigger</strong>. Cada demo demuestra no solo la técnica kinética, sino la arquitectura para preservar 60 FPS estables y cero sobrecarga de CPU/batería en dispositivos móviles.
       </p>
-    </header>
+    </section>
 
     <!-- Metrics Bar -->
-    <section class="metrics-bar" aria-label="Métricas de Arquitectura">
-      <div class="metric-pill">
-        <span class="metric-pill__val" style="color: var(--accent-emerald);">60 FPS</span>
-        <span class="metric-pill__label">GPU-Accelerated Compositing</span>
+    <section class="metrics-grid" aria-label="Métricas de Arquitectura">
+      <div class="metric-box">
+        <span class="metric-box__val" style="color: var(--accent-emerald);">60 FPS</span>
+        <span class="metric-box__label">GPU-Accelerated Compositing</span>
       </div>
-      <div class="metric-pill">
-        <span class="metric-pill__val" style="color: var(--accent-cyan);">0.000</span>
-        <span class="metric-pill__label">Cumulative Layout Shift (CLS)</span>
+      <div class="metric-box">
+        <span class="metric-box__val" style="color: var(--accent-cyan);">0.000</span>
+        <span class="metric-box__label">Cumulative Layout Shift (CLS)</span>
       </div>
-      <div class="metric-pill">
-        <span class="metric-pill__val" style="color: var(--accent-violet);">0 ms</span>
-        <span class="metric-pill__label">Zero Idle CPU (IntersectionObserver)</span>
+      <div class="metric-box">
+        <span class="metric-box__val" style="color: var(--accent-violet);">0 ms</span>
+        <span class="metric-box__label">Zero Idle CPU (IntersectionObserver)</span>
       </div>
-      <div class="metric-pill">
-        <span class="metric-pill__val" style="color: var(--accent-orange);">Zero Build</span>
-        <span class="metric-pill__label">Vanilla ES6 + Native Modules</span>
+      <div class="metric-box">
+        <span class="metric-box__val" style="color: var(--accent-coral);">Zero Build</span>
+        <span class="metric-box__label">Vanilla ES6 + Native Modules</span>
       </div>
     </section>
 
-    <!-- Demos List -->
-    <main class="demos-grid" aria-label="Catálogo de Demos Técnicas">
-      <!-- 01 -->
+    <!-- Demos Grid -->
+    <section class="demos-grid" aria-label="Catálogo de Demos">
       <a class="demo-card demo-card--01" href="demos/01-entrada-3d/index.html">
         <div>
           <div class="demo-card__top">
@@ -384,11 +572,10 @@
         </div>
         <div class="demo-card__footer">
           <span>ABRIR DEMO</span>
-          <span class="demo-card__arrow">→</span>
+          <span>→</span>
         </div>
       </a>
 
-      <!-- 02 -->
       <a class="demo-card demo-card--02" href="demos/02-parallax-multicapa/index.html">
         <div>
           <div class="demo-card__top">
@@ -402,29 +589,27 @@
         </div>
         <div class="demo-card__footer">
           <span>ABRIR DEMO</span>
-          <span class="demo-card__arrow">→</span>
+          <span>→</span>
         </div>
       </a>
 
-      <!-- 03 -->
       <a class="demo-card demo-card--03" href="demos/03-loops-desfasados/index.html">
         <div>
           <div class="demo-card__top">
             <span class="demo-card__num">DEMO 03</span>
             <span class="demo-card__tech">Harmonic Sine · Math Offsets</span>
           </div>
-          <h2 class="demo-card__title">Animaciones en Bucle Desfasadas</h2>
+          <h2 class="demo-card__title">Bucles Armónicos Desfasados</h2>
           <p class="demo-card__desc">
             Tres oscilaciones simultáneas desacopladas por nodo (flotación, rotación y escala) con duraciones basadas en factores no coincidentes. Comparador interactivo Mecánico vs Orgánico.
           </p>
         </div>
         <div class="demo-card__footer">
           <span>ABRIR DEMO</span>
-          <span class="demo-card__arrow">→</span>
+          <span>→</span>
         </div>
       </a>
 
-      <!-- 04 -->
       <a class="demo-card demo-card--04" href="demos/04-suspension-viewport/index.html">
         <div>
           <div class="demo-card__top">
@@ -438,11 +623,10 @@
         </div>
         <div class="demo-card__footer">
           <span>ABRIR DEMO</span>
-          <span class="demo-card__arrow">→</span>
+          <span>→</span>
         </div>
       </a>
 
-      <!-- 05 -->
       <a class="demo-card demo-card--05" href="demos/05-carga-condicional/index.html">
         <div>
           <div class="demo-card__top">
@@ -456,11 +640,10 @@
         </div>
         <div class="demo-card__footer">
           <span>ABRIR DEMO</span>
-          <span class="demo-card__arrow">→</span>
+          <span>→</span>
         </div>
       </a>
 
-      <!-- 06 -->
       <a class="demo-card demo-card--06" href="demos/06-refresh-lazy-images/index.html">
         <div>
           <div class="demo-card__top">
@@ -474,46 +657,79 @@
         </div>
         <div class="demo-card__footer">
           <span>ABRIR DEMO</span>
-          <span class="demo-card__arrow">→</span>
+          <span>→</span>
         </div>
       </a>
-    </main>
+    </section>
 
-    <!-- Architecture Principles -->
-    <section class="principles-box" aria-label="Principios de Ingeniería">
-      <h2>Principios de Rendimiento Aplicados</h2>
-      <div class="principles-grid">
-        <div class="principle-item">
+    <!-- Standards Section -->
+    <section class="standards-box">
+      <h2>Principios de Ingeniería WPO</h2>
+      <div class="standards-grid">
+        <div class="standard-item">
           <h3>1. Solo Transform & Opacity</h3>
-          <p>Se evita animar propiedades de geometría de layout (<code>top</code>, <code>left</code>, <code>margin</code>) que fuerzan reflows costosos en el hilo principal.</p>
+          <p>Se evita animar propiedades de geometría de layout (<code>top</code>, <code>left</code>, <code>margin</code>) que forzarían reflows costosos en el hilo principal.</p>
         </div>
-        <div class="principle-item">
+        <div class="standard-item">
           <h3>2. Gestión de VRAM</h3>
           <p>Uso transitorio de <code>will-change</code> durante el movimiento y liberación inmediata a <code>auto</code> al completar el tween.</p>
         </div>
-        <div class="principle-item">
+        <div class="standard-item">
           <h3>3. Zero Background CPU</h3>
           <p>Ningún componente consume ciclos de cómputo fuera del campo visual activo del usuario.</p>
         </div>
-        <div class="principle-item">
+        <div class="standard-item">
           <h3>4. Accesibilidad (a11y)</h3>
           <p>Soporte nativo y estricto para <code>prefers-reduced-motion</code> respetando la configuración del sistema operativo del visitante.</p>
         </div>
       </div>
     </section>
+  </main>
 
-    <!-- Footer -->
-    <footer>
-      <div class="author-info">
-        <strong>Benjamín Brante</strong> — Desarrollador Web · Arquitectura Frontend & WPO
+  <!-- Senior Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__container">
+      <div>
+        <div class="footer-col__title">Benjamín Brante</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
+          Desarrollador Web · Arquitectura Frontend, Seguridad & Optimización WPO en WordPress y ecosistemas Headless.
+        </p>
       </div>
-      <div class="footer-links">
-        <a href="https://brante.dev" target="_blank" rel="noopener">brante.dev</a>
-        <a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub</a>
+      <div>
+        <div class="footer-col__title">Navegación</div>
+        <ul class="footer-links-list">
+          <li><a href="demos/01-entrada-3d/index.html">01. Entrada 3D & CustomEase</a></li>
+          <li><a href="demos/02-parallax-multicapa/index.html">02. Parallax Multicapa</a></li>
+          <li><a href="demos/04-suspension-viewport/index.html">04. Suspensión Viewport</a></li>
+          <li><a href="demos/06-refresh-lazy-images/index.html">06. Zero CLS con Imágenes</a></li>
+        </ul>
       </div>
-    </footer>
-  </div>
+      <div>
+        <div class="footer-col__title">Contacto & Redes</div>
+        <ul class="footer-links-list">
+          <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
+          <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Benjamín Brante Pardo. Código abierto bajo licencia MIT.</span>
+      <span>60 FPS GPU Pipeline · Zero CLS Standards</span>
+    </div>
+  </footer>
 
+  <script>
+    const btnMenuToggle = document.getElementById('btnMenuToggle');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    if (btnMenuToggle && mobileDrawer) {
+      btnMenuToggle.addEventListener('click', () => {
+        const isOpen = mobileDrawer.classList.toggle('is-open');
+        btnMenuToggle.classList.toggle('is-open', isOpen);
+        btnMenuToggle.setAttribute('aria-expanded', isOpen);
+        mobileDrawer.setAttribute('aria-hidden', !isOpen);
+      });
+    }
+  </script>
 </body>
 </html>
