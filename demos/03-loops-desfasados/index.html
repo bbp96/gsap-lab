@@ -543,7 +543,7 @@
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       background: var(--bg-surface);
-      padding: 3.5rem 1.5rem;
+      padding: 4rem 1.5rem 2.5rem;
       margin-top: auto;
     }
 
@@ -551,13 +551,71 @@
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: 1.3fr 1fr 1fr 0.9fr;
       gap: 2.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .site-footer__container {
+        grid-template-columns: 1fr 1fr;
+        gap: 2.25rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .site-footer__container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .footer-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .footer-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-badge-link {
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .footer-badge-link:hover {
+      color: var(--text-main);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
     }
 
     .footer-col__title {
       font-family: var(--font-code);
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -565,13 +623,37 @@
       margin-bottom: 1rem;
     }
 
-    .footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
-    .footer-links-list a { font-family: var(--font-code); font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
-    .footer-links-list a:hover { color: var(--accent-primary); }
+    .footer-links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .footer-links-list a {
+      font-family: var(--font-code);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .footer-links-list a:hover {
+      color: var(--accent-primary);
+    }
+
+    .footer-num {
+      color: var(--accent-primary);
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
 
     .footer-bottom {
       max-width: 1200px;
-      margin: 2.5rem auto 0;
+      margin: 3rem auto 0;
       padding-top: 1.5rem;
       border-top: 1px solid var(--border-subtle);
       display: flex;
@@ -579,7 +661,8 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
-      font-size: 0.8rem;
+      font-family: var(--font-code);
+      font-size: 0.74rem;
       color: var(--text-dim);
     }
   </style>
@@ -786,27 +869,53 @@
   <!-- Footer -->
   <footer class="site-footer">
     <div class="site-footer__container">
-      <div>
-        <div class="footer-col__title">Benjamín Brante</div>
-        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
-          Desarrollador Web · Arquitectura Frontend, Seguridad & Optimización WPO en WordPress y ecosistemas Headless.
+      <div class="footer-col footer-col--brand">
+        <div class="footer-brand">
+          <div class="brand-avatar">
+            <img src="../../assets/img/logo.png" alt="Benjamín Brante Logo" class="brand-img">
+          </div>
+          <span class="brand-name">Benjamín Brante</span>
+        </div>
+        <p class="footer-desc">
+          Desarrollador Web especializado en Arquitectura Frontend, Animaciones a 60 FPS, Seguridad y Optimización WPO en WordPress y ecosistemas Headless.
         </p>
+        <div class="footer-social-links">
+          <a href="https://brante.dev" target="_blank" rel="noopener" class="footer-badge-link">brante.dev ↗</a>
+          <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener" class="footer-badge-link">GitHub ↗</a>
+          <a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener" class="footer-badge-link">LinkedIn ↗</a>
+        </div>
       </div>
-      <div>
-        <div class="footer-col__title">Navegación</div>
+
+      <div class="footer-col">
+        <div class="footer-col__title">Demos 01 — 06</div>
         <ul class="footer-links-list">
-          <li><a href="../../index.html">Portal Principal GSAP Lab</a></li>
-          <li><a href="../01-entrada-3d/index.html">01. Entrada 3D & CustomEase</a></li>
-          <li><a href="../04-suspension-viewport/index.html">04. Suspensión Viewport</a></li>
-          <li><a href="../06-refresh-lazy-images/index.html">06. Zero CLS con Imágenes</a></li>
+          <li><a href="../01-entrada-3d/index.html"><span class="footer-num">01.</span> Entradas 3D & CustomEase</a></li>
+          <li><a href="../02-parallax-multicapa/index.html"><span class="footer-num">02.</span> Parallax Multicapa & Scrub</a></li>
+          <li><a href="index.html" style="color: var(--accent-primary); font-weight: 600;"><span class="footer-num">03.</span> Bucles Armónicos Desfasados</a></li>
+          <li><a href="../04-suspension-viewport/index.html"><span class="footer-num">04.</span> Suspensión Viewport (CPU Saver)</a></li>
+          <li><a href="../05-carga-condicional/index.html"><span class="footer-num">05.</span> Carga Condicional & Guard rAF</a></li>
+          <li><a href="../06-refresh-lazy-images/index.html"><span class="footer-num">06.</span> Recálculo tras Imágenes & Zero CLS</a></li>
         </ul>
       </div>
-      <div>
-        <div class="footer-col__title">Contacto</div>
+
+      <div class="footer-col">
+        <div class="footer-col__title">Demos 07 — 11</div>
         <ul class="footer-links-list">
-          <li><a href="https://brante.dev" target="_blank" rel="noopener">Sitio Web: brante.dev</a></li>
-          <li><a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener">LinkedIn</a></li>
-          <li><a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener">GitHub Repository</a></li>
+          <li><a href="../07-matchmedia-responsive/index.html"><span class="footer-num">07.</span> Timelines con gsap.matchMedia()</a></li>
+          <li><a href="../08-context-cleanup/index.html"><span class="footer-num">08.</span> Aislamiento con gsap.context()</a></li>
+          <li><a href="../09-texto-revelado-lineas/index.html"><span class="footer-num">09.</span> Texto Revelado sin Plugins</a></li>
+          <li><a href="../10-canvas-secuencia-scroll/index.html"><span class="footer-num">10.</span> Canvas con Secuencia por Scroll</a></li>
+          <li><a href="../11-benchmark-transform-vs-layout/index.html"><span class="footer-num">11.</span> Benchmark: transform vs top/left</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col__title">Recursos & Criterios</div>
+        <ul class="footer-links-list">
+          <li><a href="../../index.html#catalogo">Catálogo Completo (11)</a></li>
+          <li><a href="../../index.html#criterios">Criterios Técnicos WPO</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab/blob/main/README.md" target="_blank" rel="noopener">Documentación (README.md)</a></li>
+          <li><a href="https://gsap.com/docs/v3/" target="_blank" rel="noopener">Documentación Oficial GSAP ↗</a></li>
         </ul>
       </div>
     </div>
