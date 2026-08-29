@@ -10,7 +10,7 @@
 
 En muchos proyectos web donde se usan animaciones (especialmente en sitios corporativos con WordPress o Astro), el problema suele ser el mismo: las animaciones se ven bonitas en una computadora de desarrollo potente, pero en un teléfono móvil de gama media la página da tirones, el scroll se pega o la batería se consume rápido.
 
-Este repositorio no es un muestrario de efectos visuales sin sentido: es una **colección de 11 soluciones técnicas y patrones de arquitectura** que he aplicado en proyectos de producción para garantizar que las animaciones corran a **60 FPS estables**, sin recalcular el DOM innecesariamente, sin fugas de memoria en navegaciones tipo SPA y respetando el consumo de recursos del usuario.
+Este repositorio no es un muestrario de efectos visuales sin sentido: es una **colección de 12 soluciones técnicas y patrones de arquitectura** que he aplicado en proyectos de producción para garantizar que las animaciones corran a **60 FPS estables**, sin recalcular el DOM innecesariamente, sin fugas de memoria en navegaciones tipo SPA y respetando el consumo de recursos del usuario.
 
 ---
 
@@ -102,6 +102,12 @@ Cada carpeta contiene un archivo `index.html` autónomo (sin dependencias de bui
 ### [11. Benchmark en Vivo: `transform` vs. `top` / `left`](demos/11-benchmark-transform-vs-layout/)
 - **El problema:** Mover elementos modificando propiedades de layout (`top`, `left`, `margin`) fuerza al navegador a ejecutar Layout + Paint 60 veces por segundo en el hilo principal de la CPU.
 - **Demostración:** Comparativa interactiva con 80 partículas y telemetría de FPS en vivo: el modo `top/left` provoca caídas a 20 FPS y 80 Reflows/frame, mientras que el modo `transform` corre a 60 FPS fijos con 0 ms de bloqueo.
+
+---
+
+### [12. Cursor Magnético y Físicas con `gsap.quickTo()`](demos/12-cursor-magnetico-quickto/)
+- **El problema:** Animar cursores seguidores o botones magnéticos en cada evento `mousemove` instanciando `gsap.to()` genera cientos de objetos efímeros por segundo, disparando pausas del Garbage Collector (*jank*).
+- **Solución:** `gsap.quickTo()` crea una tubería directa de actualización numérica sin crear nuevos objetos en el heap de JavaScript, logrando una respuesta inercial elástica y atracción magnética a 60 FPS fijos con auto-desactivación en dispositivos táctiles (`hover: none`).
 
 ---
 

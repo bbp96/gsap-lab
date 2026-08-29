@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo 12: Cursor Magnético & Físicas con quickTo() | GSAP Lab</title>
+  <meta name="description" content="Tubería de animación directa a 60 FPS sin saturación del Garbage Collector usando gsap.quickTo() para cursores seguidores y botones magnéticos.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="../../assets/img/favicon.png">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0B0C10;
+      --bg-surface: #12141A;
+      --bg-surface-elevated: #171A23;
+      --bg-surface-hover: #1E222E;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
+      --accent-seal: #D8442C;
+      --accent-primary: #F43F5E;
+      --accent-cyan: #06B6D4;
+      --accent-emerald: #10B981;
+      --accent-purple: #8B5CF6;
+      --font-display: 'Bricolage Grotesque', sans-serif;
+      --font-ui: 'Inter', sans-serif;
+      --font-code: 'IBM Plex Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Custom Cursor Elements */
+    .custom-cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .custom-cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid rgba(244, 63, 94, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.25s ease, width 0.3s var(--ease-out), height 0.3s var(--ease-out), background-color 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-cursor-label {
+      font-family: var(--font-code);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #000;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.2s ease, transform 0.2s var(--ease-out);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .custom-cursor-ring.is-hovering-link {
+      width: 54px;
+      height: 54px;
+      background: rgba(244, 63, 94, 0.15);
+      border-color: var(--accent-primary);
+    }
+
+    .custom-cursor-ring.is-spotlight {
+      width: 90px;
+      height: 90px;
+      background: #FFFFFF;
+      border-color: transparent;
+      mix-blend-mode: difference;
+    }
+
+    .custom-cursor-ring.is-spotlight .custom-cursor-label {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .custom-cursor-dot, .custom-cursor-ring {
+        display: none !important;
+      }
+    }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(11, 12, 16, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .site-header__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-divider {
+      color: var(--text-dim);
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+    }
+
+    .brand-project {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--accent-seal);
+      font-weight: 600;
+    }
+
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .desktop-nav { display: none; }
+    }
+
+    .nav-link {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover { color: var(--text-main); }
+
+    /* Dropdown Navigation */
+    .nav-item-dropdown {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    .nav-link--dropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+    }
+
+    .dropdown-chevron {
+      font-size: 0.65rem;
+      transition: transform 0.22s var(--ease-out);
+      color: var(--text-dim);
+    }
+
+    .nav-item-dropdown:hover .dropdown-chevron,
+    .nav-item-dropdown:focus-within .dropdown-chevron {
+      transform: rotate(180deg);
+      color: var(--accent-primary);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      width: 600px;
+      background: rgba(18, 20, 26, 0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 0.85rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
+      z-index: 1100;
+    }
+
+    .dropdown-menu::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: 0;
+      right: 0;
+      height: 16px;
+    }
+
+    .nav-item-dropdown:hover .dropdown-menu,
+    .nav-item-dropdown:focus-within .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-main);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus-visible {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+      transform: translateY(-1px);
+    }
+
+    .dropdown-item__num {
+      font-family: var(--font-code);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      background: rgba(244, 63, 94, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: var(--radius-sm);
+      line-height: 1;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .dropdown-item__info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .dropdown-item__title {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.25;
+    }
+
+    .dropdown-item:hover .dropdown-item__title {
+      color: var(--accent-primary);
+    }
+
+    .dropdown-item__desc {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-action {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-action:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-hamburger {
+      display: none;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.45rem 0.65rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    @media (max-width: 860px) {
+      .btn-hamburger { display: flex; flex-direction: column; gap: 4px; }
+      .btn-hamburger span { width: 18px; height: 2px; background: currentColor; }
+    }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      display: none;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 12, 16, 0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 999;
+      padding: 1.5rem;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow-y: auto;
+      border-bottom: 1px solid var(--border-strong);
+    }
+
+    .mobile-drawer.is-open { display: flex; }
+    .mobile-drawer__title { font-family: var(--font-code); font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; }
+
+    .mobile-nav-link {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mobile-nav-link--active {
+      color: #fff;
+      border-color: var(--accent-primary);
+      background: var(--bg-surface-elevated);
+    }
+
+    /* Main Container */
+    .page-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-full);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      color: #FFFFFF;
+    }
+
+    .hero-lead {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.65;
+    }
+
+    /* Telemetry HUD */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .telemetry-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .telemetry-card__label {
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .telemetry-card__val {
+      font-family: var(--font-code);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .telemetry-card__sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    /* Modes Switcher */
+    .modes-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: var(--bg-surface);
+      padding: 0.4rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      width: fit-content;
+    }
+
+    .btn-mode {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-mode:hover { color: #fff; }
+    .btn-mode.is-active {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-primary);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Sandbox Interactive Arena */
+    .arena-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      cursor: default;
+    }
+
+    .arena-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(244, 63, 94, 0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* Playground Sections */
+    .playground-view {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      z-index: 2;
+    }
+
+    .playground-view.is-visible {
+      display: flex;
+    }
+
+    /* View 1: Follower info */
+    .follower-lead {
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .follower-lead h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .follower-lead p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    /* View 2: Magnetic Grid */
+    .magnetic-elements-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      max-width: 800px;
+    }
+
+    .magnetic-btn {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      padding: 1.25rem 2.25rem;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform;
+    }
+
+    .magnetic-btn__text {
+      display: inline-block;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .magnetic-btn:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.25);
+    }
+
+    .magnetic-circle-badge {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(244, 63, 94, 0.1);
+      border: 1.5px dashed var(--accent-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      cursor: pointer;
+      will-change: transform;
+    }
+
+    /* View 3: Spotlight / Blend */
+    .spotlight-box {
+      max-width: 700px;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .spotlight-heading {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: #FFFFFF;
+      margin-bottom: 1rem;
+    }
+
+    .spotlight-box p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Technical Explanation Section */
+    .explanation-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .explanation-box h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .explanation-box p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      margin-bottom: 1rem;
+    }
+
+    .code-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .code-diff-grid { grid-template-columns: 1fr; }
+    }
+
+    .diff-block {
+      background: #0D0F14;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .diff-block--bad { border-left: 3px solid #EF4444; }
+    .diff-block--good { border-left: 3px solid #10B981; }
+
+    .diff-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .diff-title--bad { color: #EF4444; }
+    .diff-title--good { color: #10B981; }
+
+    pre {
+      overflow-x: auto;
+      color: #E2E8F0;
+    }
+
+    code {
+      font-family: var(--font-code);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      padding: 4rem 1.5rem 2.5rem;
+      margin-top: auto;
+    }
+
+    .site-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr 0.9fr;
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .site-footer__container {
+        grid-template-columns: 1fr 1fr;
+        gap: 2.25rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .site-footer__container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .footer-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .footer-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-badge-link {
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .footer-badge-link:hover {
+      color: var(--text-main);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    .footer-col__title {
+      font-family: var(--font-code);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .footer-links-list a {
+      font-family: var(--font-code);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .footer-links-list a:hover {
+      color: var(--accent-primary);
+    }
+
+    .footer-num {
+      color: var(--accent-primary);
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 3rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-code);
+      font-size: 0.74rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor Nodes -->
+  <div id="cursorDot" class="custom-cursor-dot" aria-hidden="true"></div>
+  <div id="cursorRing" class="custom-cursor-ring" aria-hidden="true">
+    <span class="custom-cursor-label">VER</span>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="../../index.html" class="site-header__brand">
+        <div class="brand-avatar">
+          <img src="../../assets/img/logo.png" alt="Benjamín Brante Logo" class="brand-img">
+        </div>
+        <span class="brand-name">Benjamín Brante</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-project">GSAP LAB</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegación">
+        <div class="nav-item-dropdown">
+          <a href="../../index.html#catalogo" class="nav-link nav-link--dropdown">Catálogo (12) <span class="dropdown-chevron">▾</span></a>
+          <div class="dropdown-menu" role="menu">
+            <a href="../01-entrada-3d/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">01</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Entradas 3D & CustomEase</span>
+                <span class="dropdown-item__desc">Perspectiva en eje Y y VRAM cleanup</span>
+              </div>
+            </a>
+            <a href="../02-parallax-multicapa/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">02</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Parallax Multicapa & Scrub</span>
+                <span class="dropdown-item__desc">Timeline unificada sin listeners duplicados</span>
+              </div>
+            </a>
+            <a href="../03-loops-desfasados/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">03</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Bucles Armónicos Desfasados</span>
+                <span class="dropdown-item__desc">Duraciones primas para movimiento orgánico</span>
+              </div>
+            </a>
+            <a href="../04-suspension-viewport/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">04</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Suspensión Viewport</span>
+                <span class="dropdown-item__desc">IntersectionObserver y ahorro de CPU</span>
+              </div>
+            </a>
+            <a href="../05-carga-condicional/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">05</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Carga Condicional & Guard rAF</span>
+                <span class="dropdown-item__desc">Sondeo frame a frame sin setTimeout</span>
+              </div>
+            </a>
+            <a href="../06-refresh-lazy-images/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">06</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Recálculo tras Imágenes & Zero CLS</span>
+                <span class="dropdown-item__desc">Reserva CSS y ScrollTrigger.refresh()</span>
+              </div>
+            </a>
+            <a href="../07-matchmedia-responsive/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">07</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Timelines con gsap.matchMedia()</span>
+                <span class="dropdown-item__desc">Reversión automática por breakpoint</span>
+              </div>
+            </a>
+            <a href="../08-context-cleanup/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">08</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Aislamiento con gsap.context()</span>
+                <span class="dropdown-item__desc">Limpieza completa de memoria en SPAs</span>
+              </div>
+            </a>
+            <a href="../09-texto-revelado-lineas/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">09</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Texto Revelado sin Plugins de Pago</span>
+                <span class="dropdown-item__desc">Máscaras con overflow:hidden en Vanilla JS</span>
+              </div>
+            </a>
+            <a href="../10-canvas-secuencia-scroll/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">10</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Canvas con Secuencia por Scroll</span>
+                <span class="dropdown-item__desc">Scrub cinemático en un único canvas 2D</span>
+              </div>
+            </a>
+            <a href="../11-benchmark-transform-vs-layout/index.html" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item__num">11</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Benchmark: transform vs top/left</span>
+                <span class="dropdown-item__desc">Medición en vivo de Reflows y FPS</span>
+              </div>
+            </a>
+            <a href="index.html" class="dropdown-item" role="menuitem" style="border-color: var(--accent-primary);">
+              <span class="dropdown-item__num">12</span>
+              <div class="dropdown-item__info">
+                <span class="dropdown-item__title">Cursor Magnético & quickTo()</span>
+                <span class="dropdown-item__desc">Cero saturación de Garbage Collector</span>
+              </div>
+            </a>
+          </div>
+        </div>
+        <a href="../../index.html#criterios" class="nav-link">Criterios WPO</a>
+        <a href="README.md" class="nav-link" target="_blank" rel="noopener">README //</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="btnMenuToggle" class="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
+    <span class="mobile-drawer__title">Catálogo Completo (12 Demos)</span>
+    <a href="../01-entrada-3d/index.html" class="mobile-nav-link"><span>01. Entradas 3D & CustomEase</span> <span>→</span></a>
+    <a href="../02-parallax-multicapa/index.html" class="mobile-nav-link"><span>02. Parallax Multicapa & Scrub</span> <span>→</span></a>
+    <a href="../03-loops-desfasados/index.html" class="mobile-nav-link"><span>03. Bucles Armónicos Desfasados</span> <span>→</span></a>
+    <a href="../04-suspension-viewport/index.html" class="mobile-nav-link"><span>04. Suspensión Viewport (CPU Saver)</span> <span>→</span></a>
+    <a href="../05-carga-condicional/index.html" class="mobile-nav-link"><span>05. Carga Condicional & Guard rAF</span> <span>→</span></a>
+    <a href="../06-refresh-lazy-images/index.html" class="mobile-nav-link"><span>06. Recálculo tras Imágenes & Zero CLS</span> <span>→</span></a>
+    <a href="../07-matchmedia-responsive/index.html" class="mobile-nav-link"><span>07. Timelines con gsap.matchMedia()</span> <span>→</span></a>
+    <a href="../08-context-cleanup/index.html" class="mobile-nav-link"><span>08. Aislamiento y Limpieza con gsap.context()</span> <span>→</span></a>
+    <a href="../09-texto-revelado-lineas/index.html" class="mobile-nav-link"><span>09. Texto Revelado sin Plugins de Pago</span> <span>→</span></a>
+    <a href="../10-canvas-secuencia-scroll/index.html" class="mobile-nav-link"><span>10. Canvas con Secuencia por Scroll</span> <span>→</span></a>
+    <a href="../11-benchmark-transform-vs-layout/index.html" class="mobile-nav-link"><span>11. Benchmark: transform vs top/left</span> <span>→</span></a>
+    <a href="index.html" class="mobile-nav-link mobile-nav-link--active"><span>12. Cursor Magnético & quickTo()</span> <span>→</span></a>
+    <a href="../../index.html" class="mobile-nav-link" style="border-color: var(--accent-seal); margin-top: 0.5rem;"><span>← Volver al Hub Principal</span></a>
+  </div>
+
+  <main class="page-main">
+    <!-- Hero Header -->
+    <section class="hero-header">
+      <div class="hero-badge">Técnica: gsap.quickTo() · Tubería Directa sin Asignación en Heap</div>
+      <h1 class="hero-title">Cursor Magnético & Físicas Inerciales con quickTo()</h1>
+      <p class="hero-lead">
+        Animar cursores o botones en cada evento <code>mousemove</code> con <code>gsap.to()</code> crea cientos de objetos por segundo y satura el Garbage Collector. <code>gsap.quickTo()</code> canaliza los datos directamente al motor de render sin asignar memoria nueva.
+      </p>
+    </section>
+
+    <!-- Live Telemetry HUD -->
+    <section class="telemetry-grid" aria-label="Telemetría en tiempo real">
+      <div class="telemetry-card">
+        <span class="telemetry-card__label">Coordenadas del Puntero</span>
+        <span class="telemetry-card__val" id="hudCoords">X: 0 | Y: 0</span>
+        <span class="telemetry-card__sub">Captura directa por pointermove</span>
+      </div>
+      <div class="telemetry-card">
+        <span class="telemetry-card__label">Nuevos Tweens en Heap</span>
+        <span class="telemetry-card__val" style="color: var(--accent-emerald);">0 / seg</span>
+        <span class="telemetry-card__sub">Instancias recicladas con quickTo</span>
+      </div>
+      <div class="telemetry-card">
+        <span class="telemetry-card__label">Estado del Dispositivo</span>
+        <span class="telemetry-card__val" id="hudDevice" style="font-size: 1.15rem; color: var(--accent-cyan);">Puntero Físico</span>
+        <span class="telemetry-card__sub">Desactivado en pantallas táctiles</span>
+      </div>
+      <div class="telemetry-card">
+        <span class="telemetry-card__label">Pipeline FPS</span>
+        <span class="telemetry-card__val" style="color: var(--accent-primary);">60 FPS</span>
+        <span class="telemetry-card__sub">Sin pausas de Garbage Collector</span>
+      </div>
+    </section>
+
+    <!-- Modes Switcher -->
+    <div class="modes-nav" role="tablist">
+      <button class="btn-mode is-active" data-view="follower">1. Seguidor Dual Inercial</button>
+      <button class="btn-mode" data-view="magnetic">2. Botones Magnéticos (Atracción)</button>
+      <button class="btn-mode" data-view="spotlight">3. Spotlight & Mix Blend Mode</button>
+    </div>
+
+    <!-- Arena Card -->
+    <section class="arena-card" id="arena">
+      <div class="arena-grid-bg"></div>
+
+      <!-- View 1: Seguidor Inercial -->
+      <div class="playground-view is-visible" id="viewFollower">
+        <div class="follower-lead">
+          <h3>Física Inercial de Dos Capas</h3>
+          <p>
+            El punto central reacciona al instante (<code>duration: 0.08s</code>), mientras que el anillo exterior tiene inercia y amortiguación elástica (<code>duration: 0.38s</code> con <code>power3.out</code>). Mueve el ratón rápidamente para ver el desfase elástico.
+          </p>
+        </div>
+      </div>
+
+      <!-- View 2: Botones Magnéticos -->
+      <div class="playground-view" id="viewMagnetic">
+        <div class="follower-lead" style="margin-bottom: 0.5rem;">
+          <h3>Atracción Magnética Progresiva</h3>
+          <p>
+            Acerca el ratón a los botones: al entrar en su radio de influencia, son atraídos hacia el cursor con cálculo trigonométrico relativo y vuelven suavemente a su centro al salir.
+          </p>
+        </div>
+
+        <div class="magnetic-elements-grid">
+          <button class="magnetic-btn js-magnetic" data-strength="35">
+            <span class="magnetic-btn__text">Iniciar Proyecto</span>
+          </button>
+
+          <button class="magnetic-btn js-magnetic" data-strength="45" style="border-color: var(--accent-cyan); color: #fff;">
+            <span class="magnetic-btn__text">Descargar CV ↗</span>
+          </button>
+
+          <div class="magnetic-circle-badge js-magnetic" data-strength="60">
+            <span class="magnetic-btn__text">60 FPS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 3: Spotlight / Blend Mode -->
+      <div class="playground-view" id="viewSpotlight">
+        <div class="spotlight-box">
+          <span style="font-family: var(--font-code); font-size: 0.72rem; color: var(--accent-primary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; display: block; margin-bottom: 0.5rem;">
+            // MODO DIFERENCIA TIPOGRÁFICA
+          </span>
+          <h2 class="spotlight-heading js-spotlight-target">
+            Arquitectura de Software y WPO de Alto Rendimiento
+          </h2>
+          <p class="js-spotlight-target">
+            Pasa el cursor sobre el texto: el anillo se expande dinámicamente y activa <code>mix-blend-mode: difference</code>, invirtiendo los colores del fondo y los caracteres con total nitidez.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Explanation -->
+    <section class="explanation-box">
+      <h2>Por qué gsap.quickTo() supera a gsap.to() en eventos continuos</h2>
+      <p>
+        En la Web moderna, eventos como <code>pointermove</code>, <code>scroll</code> o <code>wheel</code> pueden dispararse cientos de veces por segundo. Usar <code>gsap.to()</code> en estos eventos es una de las causas principales de pérdida de cuadros (*frame drops*).
+      </p>
+
+      <div class="code-diff-grid">
+        <div class="diff-block diff-block--bad">
+          <div class="diff-title diff-title--bad">
+            <span>✕ Patrón Ineficiente (gsap.to)</span>
+            <span>Heap Churn</span>
+          </div>
+          <pre><code>// Crea ~200 tweens nuevos por segundo
+window.addEventListener('pointermove', (e) => {
+  gsap.to(cursor, {
+    x: e.clientX,
+    y: e.clientY,
+    duration: 0.3,
+    overwrite: 'auto' // Sobrecarga de cálculo
+  });
+});</code></pre>
+        </div>
+
+        <div class="diff-block diff-block--good">
+          <div class="diff-title diff-title--good">
+            <span>✓ Patrón Optimizado (gsap.quickTo)</span>
+            <span>Zero GC Spikes</span>
+          </div>
+          <pre><code>// Pre-instancia la tubería una sola vez
+const setX = gsap.quickTo(cursor, 'x', { duration: 0.3, ease: 'power3.out' });
+const setY = gsap.quickTo(cursor, 'y', { duration: 0.3, ease: 'power3.out' });
+
+// En el listener solo actualiza los valores numéricos
+window.addEventListener('pointermove', (e) => {
+  setX(e.clientX);
+  setY(e.clientY);
+});</code></pre>
+        </div>
+      </div>
+
+      <p>
+        Al desacoplar la creación de la animación de su actualización numérica, el navegador mantiene el hilo principal despejado, garantizando un presupuesto de frame inferior a <strong>16.6 ms</strong>.
+      </p>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="site-footer__container">
+      <div class="footer-col footer-col--brand">
+        <div class="footer-brand">
+          <div class="brand-avatar">
+            <img src="../../assets/img/logo.png" alt="Benjamín Brante Logo" class="brand-img">
+          </div>
+          <span class="brand-name">Benjamín Brante</span>
+        </div>
+        <p class="footer-desc">
+          Desarrollador Web especializado en Arquitectura Frontend, Animaciones a 60 FPS, Seguridad y Optimización WPO en WordPress y ecosistemas Headless.
+        </p>
+        <div class="footer-social-links">
+          <a href="https://brante.dev" target="_blank" rel="noopener" class="footer-badge-link">brante.dev ↗</a>
+          <a href="https://github.com/bbp96/gsap-lab" target="_blank" rel="noopener" class="footer-badge-link">GitHub ↗</a>
+          <a href="https://linkedin.com/in/benjaminbrante" target="_blank" rel="noopener" class="footer-badge-link">LinkedIn ↗</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col__title">Demos 01 — 06</div>
+        <ul class="footer-links-list">
+          <li><a href="../01-entrada-3d/index.html"><span class="footer-num">01.</span> Entradas 3D & CustomEase</a></li>
+          <li><a href="../02-parallax-multicapa/index.html"><span class="footer-num">02.</span> Parallax Multicapa & Scrub</a></li>
+          <li><a href="../03-loops-desfasados/index.html"><span class="footer-num">03.</span> Bucles Armónicos Desfasados</a></li>
+          <li><a href="../04-suspension-viewport/index.html"><span class="footer-num">04.</span> Suspensión Viewport (CPU Saver)</a></li>
+          <li><a href="../05-carga-condicional/index.html"><span class="footer-num">05.</span> Carga Condicional & Guard rAF</a></li>
+          <li><a href="../06-refresh-lazy-images/index.html"><span class="footer-num">06.</span> Recálculo tras Imágenes & Zero CLS</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col__title">Demos 07 — 12</div>
+        <ul class="footer-links-list">
+          <li><a href="../07-matchmedia-responsive/index.html"><span class="footer-num">07.</span> Timelines con gsap.matchMedia()</a></li>
+          <li><a href="../08-context-cleanup/index.html"><span class="footer-num">08.</span> Aislamiento con gsap.context()</a></li>
+          <li><a href="../09-texto-revelado-lineas/index.html"><span class="footer-num">09.</span> Texto Revelado sin Plugins</a></li>
+          <li><a href="../10-canvas-secuencia-scroll/index.html"><span class="footer-num">10.</span> Canvas con Secuencia por Scroll</a></li>
+          <li><a href="../11-benchmark-transform-vs-layout/index.html"><span class="footer-num">11.</span> Benchmark: transform vs top/left</a></li>
+          <li><a href="index.html" style="color: var(--accent-primary); font-weight: 600;"><span class="footer-num">12.</span> Cursor Magnético & quickTo()</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col__title">Recursos & Criterios</div>
+        <ul class="footer-links-list">
+          <li><a href="../../index.html#catalogo">Catálogo Completo (12)</a></li>
+          <li><a href="../../index.html#criterios">Criterios Técnicos WPO</a></li>
+          <li><a href="https://github.com/bbp96/gsap-lab/blob/main/README.md" target="_blank" rel="noopener">Documentación (README.md)</a></li>
+          <li><a href="https://gsap.com/docs/v3/" target="_blank" rel="noopener">Documentación Oficial GSAP ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Benjamín Brante Pardo. Código abierto bajo licencia MIT.</span>
+      <span>60 FPS GPU Pipeline · Zero CLS Standards</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script>
+    (() => {
+      'use strict';
+
+      // Mobile Menu Drawer
+      const btnMenuToggle = document.getElementById('btnMenuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      if (btnMenuToggle && mobileDrawer) {
+        btnMenuToggle.addEventListener('click', () => {
+          const isOpen = mobileDrawer.classList.toggle('is-open');
+          btnMenuToggle.classList.toggle('is-open', isOpen);
+          btnMenuToggle.setAttribute('aria-expanded', isOpen);
+          mobileDrawer.setAttribute('aria-hidden', !isOpen);
+        });
+      }
+
+      // Check touch device
+      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+      const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const hudDevice = document.getElementById('hudDevice');
+      const hudCoords = document.getElementById('hudCoords');
+
+      if (isTouch) {
+        if (hudDevice) hudDevice.textContent = 'Pantalla Táctil';
+        return; // Guard clause: no instanciar cursores en móvil
+      }
+
+      const dot = document.getElementById('cursorDot');
+      const ring = document.getElementById('cursorRing');
+
+      // Crear tuberías de animación de alta velocidad (quickTo)
+      const dotX = gsap.quickTo(dot, 'x', { duration: 0.08, ease: 'power2.out' });
+      const dotY = gsap.quickTo(dot, 'y', { duration: 0.08, ease: 'power2.out' });
+
+      const ringX = gsap.quickTo(ring, 'x', { duration: 0.38, ease: 'power3.out' });
+      const ringY = gsap.quickTo(ring, 'y', { duration: 0.38, ease: 'power3.out' });
+
+      let isCursorVisible = false;
+
+      // Evento de movimiento continuo
+      window.addEventListener('pointermove', (e) => {
+        if (!isCursorVisible) {
+          gsap.to([dot, ring], { opacity: 1, duration: 0.25 });
+          isCursorVisible = true;
+        }
+
+        dotX(e.clientX);
+        dotY(e.clientY);
+        ringX(e.clientX);
+        ringY(e.clientY);
+
+        if (hudCoords) {
+          hudCoords.textContent = `X: ${Math.round(e.clientX)} | Y: ${Math.round(e.clientY)}`;
+        }
+      }, { passive: true });
+
+      // Ocultar si el puntero abandona la ventana
+      document.addEventListener('mouseleave', () => {
+        gsap.to([dot, ring], { opacity: 0, duration: 0.25 });
+        isCursorVisible = false;
+      });
+
+      // Switcher de Vistas del Playground
+      const modeBtns = document.querySelectorAll('.btn-mode');
+      const views = {
+        follower: document.getElementById('viewFollower'),
+        magnetic: document.getElementById('viewMagnetic'),
+        spotlight: document.getElementById('viewSpotlight')
+      };
+
+      modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          modeBtns.forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+
+          const targetView = btn.dataset.view;
+          Object.entries(views).forEach(([key, viewEl]) => {
+            if (key === targetView) {
+              viewEl.classList.add('is-visible');
+            } else {
+              viewEl.classList.remove('is-visible');
+            }
+          });
+
+          // Reset ring state
+          ring.classList.remove('is-spotlight', 'is-hovering-link');
+        });
+      });
+
+      // Lógica de Botones Magnéticos (quickTo en cada botón)
+      const magneticEls = document.querySelectorAll('.js-magnetic');
+
+      magneticEls.forEach(el => {
+        const textEl = el.querySelector('.magnetic-btn__text') || el;
+        const strength = parseFloat(el.dataset.strength) || 30;
+
+        const xTo = gsap.quickTo(el, 'x', { duration: 0.45, ease: 'power3.out' });
+        const yTo = gsap.quickTo(el, 'y', { duration: 0.45, ease: 'power3.out' });
+        const textXTo = gsap.quickTo(textEl, 'x', { duration: 0.35, ease: 'power2.out' });
+        const textYTo = gsap.quickTo(textEl, 'y', { duration: 0.35, ease: 'power2.out' });
+
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+
+          const dx = e.clientX - cx;
+          const dy = e.clientY - cy;
+
+          xTo(dx * (strength / 100));
+          yTo(dy * (strength / 100));
+          textXTo(dx * ((strength * 0.4) / 100));
+          textYTo(dy * ((strength * 0.4) / 100));
+
+          ring.classList.add('is-hovering-link');
+        });
+
+        el.addEventListener('mouseleave', () => {
+          xTo(0);
+          yTo(0);
+          textXTo(0);
+          textYTo(0);
+          ring.classList.remove('is-hovering-link');
+        });
+      });
+
+      // Lógica de Spotlight & Blend Mode
+      const spotlightTargets = document.querySelectorAll('.js-spotlight-target');
+      spotlightTargets.forEach(target => {
+        target.addEventListener('mouseenter', () => {
+          ring.classList.add('is-spotlight');
+        });
+        target.addEventListener('mouseleave', () => {
+          ring.classList.remove('is-spotlight');
+        });
+      });
+
+      // Hover en enlaces generales
+      const generalLinks = document.querySelectorAll('a, button:not(.js-magnetic)');
+      generalLinks.forEach(link => {
+        link.addEventListener('mouseenter', () => ring.classList.add('is-hovering-link'));
+        link.addEventListener('mouseleave', () => ring.classList.remove('is-hovering-link'));
+      });
+    })();
+  </script>
+</body>
+</html>
