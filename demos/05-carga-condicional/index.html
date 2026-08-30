@@ -539,6 +539,24 @@
     .log-msg--warn { color: var(--accent-amber); }
     .log-msg--error { color: #EF4444; }
 
+    @media (max-width: 768px) {
+      .sandbox-card {
+        padding: 1.5rem 1rem;
+      }
+      .chips-grid {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+      }
+      .stage-card {
+        padding: 1.5rem 1rem;
+        min-height: 240px;
+      }
+      .terminal-card {
+        padding: 1.25rem 1rem;
+        min-height: 240px;
+      }
+    }
+
     /* Footer */
     .site-footer {
       border-top: 1px solid var(--border-subtle);

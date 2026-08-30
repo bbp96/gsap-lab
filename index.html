@@ -619,6 +619,32 @@
       line-height: 1.5;
     }
 
+    @media (max-width: 768px) {
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 2.5rem;
+      }
+      .metric-box {
+        padding: 1rem;
+      }
+      .metric-box__val {
+        font-size: 1.15rem;
+      }
+      .demos-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-bottom: 3.5rem;
+      }
+      .standards-box {
+        padding: 2rem 1.25rem;
+      }
+      .standards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
     /* Footer */
     .site-footer {
       border-top: 1px solid var(--border-subtle);

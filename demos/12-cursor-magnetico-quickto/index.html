@@ -57,6 +57,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      overflow-x: hidden;
     }
 
     /* Custom Cursor Elements */
@@ -563,6 +564,27 @@
       cursor: default;
     }
 
+    @media (max-width: 768px) {
+      .arena-card {
+        padding: 2rem 1rem;
+        min-height: 360px;
+      }
+      .telemetry-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .magnetic-elements-grid {
+        gap: 1.25rem;
+      }
+      .modes-nav {
+        width: 100%;
+      }
+      .btn-mode {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
     .arena-grid-bg {
       position: absolute;
       inset: 0;
@@ -716,6 +738,11 @@
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
       margin: 1.5rem 0;
+      min-width: 0;
+    }
+
+    .code-diff-grid > * {
+      min-width: 0;
     }
 
     @media (max-width: 768px) {
@@ -730,6 +757,9 @@
       font-family: var(--font-code);
       font-size: 0.78rem;
       line-height: 1.5;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .diff-block--bad { border-left: 3px solid #EF4444; }
@@ -748,7 +778,14 @@
 
     pre {
       overflow-x: auto;
+      max-width: 100%;
+      width: 100%;
+      white-space: pre-wrap;
+      word-break: break-word;
       color: #E2E8F0;
+      padding: 0.25rem 0;
+      margin: 0;
+      box-sizing: border-box;
     }
 
     code {
@@ -757,6 +794,7 @@
       padding: 0.15rem 0.35rem;
       border-radius: 4px;
       font-size: 0.85em;
+      word-break: break-word;
     }
 
     /* Footer */
@@ -1252,47 +1290,46 @@ window.addEventListener('pointermove', (e) => {
       const hudDevice = document.getElementById('hudDevice');
       const hudCoords = document.getElementById('hudCoords');
 
-      if (isTouch) {
-        if (hudDevice) hudDevice.textContent = 'Pantalla Táctil';
-        return; // Guard clause: no instanciar cursores en móvil
+      if (hudDevice) {
+        hudDevice.textContent = isTouch ? 'Pantalla Táctil' : 'Puntero Físico';
       }
 
       const dot = document.getElementById('cursorDot');
       const ring = document.getElementById('cursorRing');
 
-      // Crear tuberías de animación de alta velocidad (quickTo)
-      const dotX = gsap.quickTo(dot, 'x', { duration: 0.08, ease: 'power2.out' });
-      const dotY = gsap.quickTo(dot, 'y', { duration: 0.08, ease: 'power2.out' });
-
-      const ringX = gsap.quickTo(ring, 'x', { duration: 0.38, ease: 'power3.out' });
-      const ringY = gsap.quickTo(ring, 'y', { duration: 0.38, ease: 'power3.out' });
-
+      // Crear tuberías de animación de alta velocidad (quickTo) solo para punteros de escritorio
+      let dotX, dotY, ringX, ringY;
       let isCursorVisible = false;
 
-      // Evento de movimiento continuo
-      window.addEventListener('pointermove', (e) => {
-        if (!isCursorVisible) {
-          gsap.to([dot, ring], { opacity: 1, duration: 0.25 });
-          isCursorVisible = true;
-        }
+      if (!isTouch && dot && ring) {
+        dotX = gsap.quickTo(dot, 'x', { duration: 0.08, ease: 'power2.out' });
+        dotY = gsap.quickTo(dot, 'y', { duration: 0.08, ease: 'power2.out' });
+        ringX = gsap.quickTo(ring, 'x', { duration: 0.38, ease: 'power3.out' });
+        ringY = gsap.quickTo(ring, 'y', { duration: 0.38, ease: 'power3.out' });
 
-        dotX(e.clientX);
-        dotY(e.clientY);
-        ringX(e.clientX);
-        ringY(e.clientY);
+        window.addEventListener('pointermove', (e) => {
+          if (!isCursorVisible) {
+            gsap.to([dot, ring], { opacity: 1, duration: 0.25 });
+            isCursorVisible = true;
+          }
 
-        if (hudCoords) {
-          hudCoords.textContent = `X: ${Math.round(e.clientX)} | Y: ${Math.round(e.clientY)}`;
-        }
-      }, { passive: true });
+          dotX(e.clientX);
+          dotY(e.clientY);
+          ringX(e.clientX);
+          ringY(e.clientY);
 
-      // Ocultar si el puntero abandona la ventana
-      document.addEventListener('mouseleave', () => {
-        gsap.to([dot, ring], { opacity: 0, duration: 0.25 });
-        isCursorVisible = false;
-      });
+          if (hudCoords) {
+            hudCoords.textContent = `X: ${Math.round(e.clientX)} | Y: ${Math.round(e.clientY)}`;
+          }
+        }, { passive: true });
 
-      // Switcher de Vistas del Playground
+        document.addEventListener('mouseleave', () => {
+          gsap.to([dot, ring], { opacity: 0, duration: 0.25 });
+          isCursorVisible = false;
+        });
+      }
+
+      // Switcher de Vistas del Playground (funciona tanto en Desktop como en Móvil)
       const modeBtns = document.querySelectorAll('.btn-mode');
       const views = {
         follower: document.getElementById('viewFollower'),
@@ -1314,12 +1351,11 @@ window.addEventListener('pointermove', (e) => {
             }
           });
 
-          // Reset ring state
-          ring.classList.remove('is-spotlight', 'is-hovering-link');
+          if (ring) ring.classList.remove('is-spotlight', 'is-hovering-link');
         });
       });
 
-      // Lógica de Botones Magnéticos (quickTo en cada botón)
+      // Lógica de Botones Magnéticos (quickTo en cada botón con soporte Mouse + Touch)
       const magneticEls = document.querySelectorAll('.js-magnetic');
 
       magneticEls.forEach(el => {
@@ -1331,48 +1367,63 @@ window.addEventListener('pointermove', (e) => {
         const textXTo = gsap.quickTo(textEl, 'x', { duration: 0.35, ease: 'power2.out' });
         const textYTo = gsap.quickTo(textEl, 'y', { duration: 0.35, ease: 'power2.out' });
 
-        el.addEventListener('mousemove', (e) => {
+        const handleMove = (clientX, clientY) => {
           const rect = el.getBoundingClientRect();
           const cx = rect.left + rect.width / 2;
           const cy = rect.top + rect.height / 2;
 
-          const dx = e.clientX - cx;
-          const dy = e.clientY - cy;
+          const dx = clientX - cx;
+          const dy = clientY - cy;
 
           xTo(dx * (strength / 100));
           yTo(dy * (strength / 100));
           textXTo(dx * ((strength * 0.4) / 100));
           textYTo(dy * ((strength * 0.4) / 100));
 
-          ring.classList.add('is-hovering-link');
-        });
+          if (ring) ring.classList.add('is-hovering-link');
+          if (hudCoords) hudCoords.textContent = `X: ${Math.round(clientX)} | Y: ${Math.round(clientY)}`;
+        };
 
-        el.addEventListener('mouseleave', () => {
+        const handleLeave = () => {
           xTo(0);
           yTo(0);
           textXTo(0);
           textYTo(0);
-          ring.classList.remove('is-hovering-link');
-        });
+          if (ring) ring.classList.remove('is-hovering-link');
+        };
+
+        // Eventos Mouse
+        el.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+        el.addEventListener('mouseleave', handleLeave);
+
+        // Eventos Táctiles (Mobile Touch)
+        el.addEventListener('touchmove', (e) => {
+          if (e.touches.length > 0) {
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+        el.addEventListener('touchend', handleLeave);
       });
 
       // Lógica de Spotlight & Blend Mode
       const spotlightTargets = document.querySelectorAll('.js-spotlight-target');
       spotlightTargets.forEach(target => {
         target.addEventListener('mouseenter', () => {
-          ring.classList.add('is-spotlight');
+          if (ring) ring.classList.add('is-spotlight');
         });
         target.addEventListener('mouseleave', () => {
-          ring.classList.remove('is-spotlight');
+          if (ring) ring.classList.remove('is-spotlight');
         });
       });
 
       // Hover en enlaces generales
-      const generalLinks = document.querySelectorAll('a, button:not(.js-magnetic)');
-      generalLinks.forEach(link => {
-        link.addEventListener('mouseenter', () => ring.classList.add('is-hovering-link'));
-        link.addEventListener('mouseleave', () => ring.classList.remove('is-hovering-link'));
-      });
+      if (!isTouch && ring) {
+        const generalLinks = document.querySelectorAll('a, button:not(.js-magnetic)');
+        generalLinks.forEach(link => {
+          link.addEventListener('mouseenter', () => ring.classList.add('is-hovering-link'));
+          link.addEventListener('mouseleave', () => ring.classList.remove('is-hovering-link'));
+        });
+      }
     })();
   </script>
 </body>

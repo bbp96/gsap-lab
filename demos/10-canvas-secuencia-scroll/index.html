@@ -498,6 +498,43 @@
 
     .explanation-box p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1rem; }
 
+    @media (max-width: 768px) {
+      .hud-box {
+        position: static;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .canvas-scroll-wrapper {
+        height: 250vh;
+        margin-bottom: 2rem;
+      }
+
+      .canvas-pin-container {
+        top: 65px;
+        height: 52vh;
+        min-height: 280px;
+      }
+
+      .canvas-overlay-text {
+        bottom: 0.65rem;
+        left: 0.65rem;
+        right: 0.65rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+      }
+
+      .overlay-tag {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.55rem;
+        width: 100%;
+        text-align: center;
+      }
+    }
+
     /* Footer */
     .site-footer {
       border-top: 1px solid var(--border-subtle);
@@ -906,6 +943,7 @@
 
         const cx = width / 2;
         const cy = height / 2;
+        const baseRadius = Math.min(width, height) * 0.26;
 
         // Anillo exterior rotatorio
         ctx.save();
@@ -913,19 +951,19 @@
         ctx.rotate(progress * Math.PI * 4);
 
         ctx.strokeStyle = `rgba(16, 185, 129, ${0.3 + progress * 0.7})`;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = Math.max(2, width * 0.004);
         ctx.beginPath();
-        ctx.arc(0, 0, 140, 0, Math.PI * 1.5);
+        ctx.arc(0, 0, baseRadius, 0, Math.PI * 1.5);
         ctx.stroke();
 
         // Nodos orbitales
         for (let i = 0; i < 6; i++) {
           const angle = (i / 6) * Math.PI * 2 + progress * Math.PI * 2;
-          const nx = Math.cos(angle) * (140 + Math.sin(progress * Math.PI * 4) * 20);
-          const ny = Math.sin(angle) * (140 + Math.sin(progress * Math.PI * 4) * 20);
+          const nx = Math.cos(angle) * (baseRadius + Math.sin(progress * Math.PI * 4) * (baseRadius * 0.15));
+          const ny = Math.sin(angle) * (baseRadius + Math.sin(progress * Math.PI * 4) * (baseRadius * 0.15));
           ctx.fillStyle = i % 2 === 0 ? '#06B6D4' : '#10B981';
           ctx.beginPath();
-          ctx.arc(nx, ny, 6 + Math.sin(progress * Math.PI * 2 + i) * 3, 0, Math.PI * 2);
+          ctx.arc(nx, ny, Math.max(4, baseRadius * 0.045) + Math.sin(progress * Math.PI * 2 + i) * 2, 0, Math.PI * 2);
           ctx.fill();
         }
 
@@ -934,7 +972,7 @@
         // Cubo isométrico central giratorio
         ctx.save();
         ctx.translate(cx, cy);
-        const scale = 0.8 + progress * 0.4;
+        const scale = (0.7 + progress * 0.35) * (baseRadius / 140);
         ctx.scale(scale, scale);
         ctx.rotate(-progress * Math.PI * 2);
 
@@ -948,10 +986,9 @@
         ctx.restore();
 
         // HUD Text en Canvas
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.font = '12px "IBM Plex Mono", monospace';
-        ctx.fillText(`VECTOR ENGINE // FRAME: ${Math.round(frameIndex)} / ${TOTAL_FRAMES}`, 30, 40);
-        ctx.fillText(`PROGRESS: ${(progress * 100).toFixed(1)}%`, 30, 60);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.font = '11px "IBM Plex Mono", monospace';
+        ctx.fillText(`FRAME: ${Math.round(frameIndex)} / ${TOTAL_FRAMES} · ${(progress * 100).toFixed(0)}%`, 20, 30);
       };
 
       // Inicializar frame 0

@@ -453,6 +453,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      contain: paint;
       margin: 2rem 0;
       border-top: 1px solid var(--border-subtle);
       border-bottom: 1px solid var(--border-subtle);
@@ -463,6 +464,7 @@
       position: absolute;
       will-change: transform;
       pointer-events: none;
+      z-index: 1;
     }
 
     .p-layer--bg-card {
@@ -502,6 +504,7 @@
       position: relative;
       z-index: 10;
       max-width: 540px;
+      width: 100%;
       padding: 3rem 2.2rem;
       background: var(--bg-surface);
       border: 1px solid var(--border-strong);
@@ -538,6 +541,67 @@
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 1.25rem;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .parallax-arena {
+        min-height: 95vh;
+        padding: 3rem 1rem;
+      }
+
+      .p-layer {
+        opacity: 0.45 !important;
+        pointer-events: none;
+      }
+
+      .p-layer--bg-card {
+        width: 145px;
+        padding: 0.75rem;
+        top: 3%;
+        left: 3%;
+        font-size: 0.72rem;
+      }
+
+      .p-layer--mid-card {
+        width: 140px;
+        padding: 0.75rem;
+        top: 16%;
+        right: 3%;
+        left: auto;
+        font-size: 0.72rem;
+      }
+
+      .p-layer--fg-chip {
+        width: 135px;
+        padding: 0.75rem;
+        bottom: 4%;
+        right: 3%;
+        font-size: 0.72rem;
+      }
+
+      .anchor-center {
+        background: rgba(18, 20, 26, 0.95);
+        backdrop-filter: blur(12px);
+        padding: 2.25rem 1.25rem;
+        margin: 4.5rem 0.5rem;
+        z-index: 10;
+      }
+
+      .anchor-center__title {
+        font-size: 1.3rem;
+      }
+
+      .anchor-center__desc {
+        font-size: 0.85rem;
+      }
+
+      .hud-bar {
+        position: static;
+        margin: 1.5rem auto 3rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
     }
 
     .hud-stat { display: flex; flex-direction: column; gap: 0.2rem; }
@@ -972,46 +1036,50 @@
       const hudL2 = document.getElementById('hudL2');
       const hudL3 = document.getElementById('hudL3');
 
-      const variantBtns = document.querySelectorAll('.btn-variant');
-      let currentTimeline = null;
+      let mm = gsap.matchMedia();
+      let currentMode = 'classic';
 
       const buildParallax = (mode) => {
-        if (currentTimeline) {
-          currentTimeline.kill();
-          gsap.set([layerBg, layerMid, layerFg], { clearProps: 'all' });
-        }
+        currentMode = mode;
+        mm.revert(); // Limpiar instancias previas
 
-        currentTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: arena,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.5,
-            onUpdate: (self) => {
-              const p = (self.progress * 100).toFixed(1);
-              hudProgress.textContent = `${p}%`;
-              hudL1.textContent = `${Math.round(gsap.getProperty(layerBg, 'y') || 0)} px`;
-              hudL2.textContent = `${Math.round(gsap.getProperty(layerMid, 'y') || 0)} px`;
-              hudL3.textContent = `${Math.round(gsap.getProperty(layerFg, 'y') || 0)} px`;
+        mm.add({
+          isDesktop: "(min-width: 769px)",
+          isMobile: "(max-width: 768px)"
+        }, (context) => {
+          const { isMobile } = context.conditions;
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: arena,
+              start: isMobile ? 'top 95%' : 'top bottom',
+              end: isMobile ? 'bottom 5%' : 'bottom top',
+              scrub: 1.5,
+              onUpdate: (self) => {
+                const p = (self.progress * 100).toFixed(1);
+                if (hudProgress) hudProgress.textContent = `${p}%`;
+                if (hudL1) hudL1.textContent = `${Math.round(gsap.getProperty(layerBg, 'y') || 0)} px`;
+                if (hudL2) hudL2.textContent = `${Math.round(gsap.getProperty(layerMid, 'y') || 0)} px`;
+                if (hudL3) hudL3.textContent = `${Math.round(gsap.getProperty(layerFg, 'y') || 0)} px`;
+              }
             }
+          });
+
+          // Deltas adaptados a la altura real del dispositivo
+          if (mode === 'classic') {
+            tl.to(layerBg, { y: isMobile ? -50 : -160, ease: 'none' }, 0);
+            tl.to(layerMid, { y: isMobile ? -110 : -340, ease: 'none' }, 0);
+            tl.to(layerFg, { y: isMobile ? -180 : -580, ease: 'none' }, 0);
+          } else if (mode === 'split') {
+            tl.to(layerBg, { y: isMobile ? -70 : -240, ease: 'none' }, 0);
+            tl.to(layerMid, { y: isMobile ? 60 : 220, ease: 'none' }, 0);
+            tl.to(layerFg, { y: isMobile ? -140 : -480, ease: 'none' }, 0);
+          } else if (mode === 'rotscale') {
+            tl.to(layerBg, { y: isMobile ? -60 : -180, scale: isMobile ? 1.04 : 1.1, ease: 'none' }, 0);
+            tl.to(layerMid, { y: isMobile ? -100 : -360, rotation: isMobile ? -4 : -8, ease: 'none' }, 0);
+            tl.to(layerFg, { y: isMobile ? -170 : -600, rotation: isMobile ? 6 : 12, scale: isMobile ? 1.03 : 1.05, ease: 'none' }, 0);
           }
         });
-
-        if (mode === 'classic') {
-          currentTimeline.to(layerBg, { y: -160, ease: 'none' }, 0);
-          currentTimeline.to(layerMid, { y: -340, ease: 'none' }, 0);
-          currentTimeline.to(layerFg, { y: -580, ease: 'none' }, 0);
-        } else if (mode === 'split') {
-          // Contracorriente: el fondo y frente suben, el medio baja
-          currentTimeline.to(layerBg, { y: -240, ease: 'none' }, 0);
-          currentTimeline.to(layerMid, { y: 220, ease: 'none' }, 0);
-          currentTimeline.to(layerFg, { y: -480, ease: 'none' }, 0);
-        } else if (mode === 'rotscale') {
-          // Con rotación y escala sutil
-          currentTimeline.to(layerBg, { y: -180, scale: 1.1, ease: 'none' }, 0);
-          currentTimeline.to(layerMid, { y: -360, rotation: -8, ease: 'none' }, 0);
-          currentTimeline.to(layerFg, { y: -600, rotation: 12, scale: 1.05, ease: 'none' }, 0);
-        }
       };
 
       buildParallax('classic');

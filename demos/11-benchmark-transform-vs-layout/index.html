@@ -492,6 +492,30 @@
       pointer-events: none;
     }
 
+    @media (max-width: 768px) {
+      .benchmark-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      .switch-group {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .btn-engine {
+        width: 100%;
+        text-align: center;
+      }
+      .benchmark-telemetry {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .benchmark-stage {
+        height: 280px;
+      }
+    }
+
     /* Explanation Breakdown */
     .explanation-box {
       background: var(--bg-surface);

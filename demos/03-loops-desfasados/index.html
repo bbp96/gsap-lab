@@ -489,6 +489,20 @@
     .node-text__num { font-size: 1.15rem; font-weight: 700; color: #fff; }
     .node-text__meta { font-size: 0.65rem; color: var(--text-dim); }
 
+    @media (max-width: 768px) {
+      .node-arena {
+        padding: 3rem 1rem;
+        min-height: 220px;
+      }
+      .nodes-grid {
+        gap: 1.25rem;
+      }
+      .node-item {
+        width: clamp(75px, 22vw, 95px);
+        height: clamp(75px, 22vw, 95px);
+      }
+    }
+
     /* Comparison Split */
     .comparison-grid {
       display: grid;

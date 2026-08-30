@@ -1020,7 +1020,13 @@
         });
       };
 
-      runAnimation('flip');
+      // Inicializar mediante ScrollTrigger para no disparar antes de que el usuario haga scroll
+      ScrollTrigger.create({
+        trigger: '#cardsGrid',
+        start: 'top 85%',
+        once: true,
+        onEnter: () => runAnimation('flip')
+      });
 
       variantBtns.forEach(btn => {
         btn.addEventListener('click', () => {
