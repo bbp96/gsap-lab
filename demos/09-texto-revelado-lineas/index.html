@@ -1084,13 +1084,17 @@
         renderAndAnimate(currentMode);
       });
 
-      // Disparar solo cuando el usuario llega al contenedor del escenario
-      ScrollTrigger.create({
-        trigger: stage,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => renderAndAnimate(currentMode)
-      });
+      // Disparar solo cuando el usuario llega al contenedor del escenario o si ya está visible
+      if (stage && ScrollTrigger.isInViewport(stage)) {
+        renderAndAnimate(currentMode);
+      } else {
+        ScrollTrigger.create({
+          trigger: stage,
+          start: 'top 75%',
+          once: true,
+          onEnter: () => renderAndAnimate(currentMode)
+        });
+      }
     })();
   </script>
 </body>

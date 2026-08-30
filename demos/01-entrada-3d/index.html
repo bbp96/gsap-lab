@@ -1020,13 +1020,18 @@
         });
       };
 
-      // Inicializar mediante ScrollTrigger para no disparar antes de que el usuario haga scroll
-      ScrollTrigger.create({
-        trigger: '#cardsGrid',
-        start: 'top 85%',
-        once: true,
-        onEnter: () => runAnimation('flip')
-      });
+      // Inicializar: si ya está en viewport corre inmediatamente, si no, espera a que el usuario llegue al 75%
+      const cardsGrid = document.getElementById('cardsGrid');
+      if (cardsGrid && ScrollTrigger.isInViewport(cardsGrid)) {
+        runAnimation('flip');
+      } else {
+        ScrollTrigger.create({
+          trigger: '#cardsGrid',
+          start: 'top 75%',
+          once: true,
+          onEnter: () => runAnimation('flip')
+        });
+      }
 
       variantBtns.forEach(btn => {
         btn.addEventListener('click', () => {

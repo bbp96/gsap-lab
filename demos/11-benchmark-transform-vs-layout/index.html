@@ -834,6 +834,12 @@
       </div>
     </section>
 
+    <!-- Visual Arena Header -->
+    <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--accent-primary); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+      <span>✦ Arena Interactiva: Arrastra el ratón / dedo o inclina tu móvil para repeler partículas</span>
+      <span id="gyroIndicator" style="color: var(--text-dim);">[Giroscopio: Listo]</span>
+    </div>
+
     <!-- Visual Arena -->
     <section class="benchmark-stage" id="stageContainer"></section>
 
@@ -1045,6 +1051,85 @@
         initNodes();
         startAnimation('layout');
       });
+
+      // Interacción Táctil y Ratón: Arrastre / Fuerza de Repulsión
+      const handlePointerMove = (clientX, clientY) => {
+        const rect = stage.getBoundingClientRect();
+        const pointerX = clientX - rect.left;
+        const pointerY = clientY - rect.top;
+
+        nodes.forEach(node => {
+          const nx = node.offsetLeft + (parseFloat(gsap.getProperty(node, 'x')) || 0);
+          const ny = node.offsetTop + (parseFloat(gsap.getProperty(node, 'y')) || 0);
+          const dx = nx - pointerX;
+          const dy = ny - pointerY;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < 120) {
+            const force = (120 - dist) / 120;
+            const pushX = (dx / (dist || 1)) * force * 50;
+            const pushY = (dy / (dist || 1)) * force * 50;
+
+            if (currentMode === 'transform') {
+              gsap.to(node, {
+                x: `+=${pushX}`,
+                y: `+=${pushY}`,
+                duration: 0.35,
+                ease: 'power2.out',
+                overwrite: 'auto'
+              });
+            } else {
+              gsap.to(node, {
+                left: `+=${pushX}px`,
+                top: `+=${pushY}px`,
+                duration: 0.35,
+                ease: 'power2.out',
+                overwrite: 'auto'
+              });
+            }
+          }
+        });
+      };
+
+      stage.addEventListener('mousemove', (e) => {
+        handlePointerMove(e.clientX, e.clientY);
+      });
+
+      stage.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      // Giroscopio / DeviceOrientation en dispositivos móviles
+      const gyroIndicator = document.getElementById('gyroIndicator');
+      if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', (e) => {
+          if (e.gamma !== null && e.beta !== null) {
+            const tiltX = Math.max(-50, Math.min(50, (e.gamma || 0) * 1.5));
+            const tiltY = Math.max(-50, Math.min(50, ((e.beta || 45) - 45) * 1.5));
+
+            if (gyroIndicator) {
+              gyroIndicator.textContent = `[Giroscopio: γ ${Math.round(e.gamma)}° | β ${Math.round(e.beta)}°]`;
+              gyroIndicator.style.color = 'var(--accent-success)';
+            }
+
+            nodes.forEach((node, idx) => {
+              if (idx % 2 === 0) {
+                if (currentMode === 'transform') {
+                  gsap.to(node, {
+                    x: `+=${tiltX * 0.3}`,
+                    y: `+=${tiltY * 0.3}`,
+                    duration: 0.5,
+                    ease: 'power1.out',
+                    overwrite: 'auto'
+                  });
+                }
+              }
+            });
+          }
+        }, { passive: true });
+      }
 
       initNodes();
       startAnimation('transform');

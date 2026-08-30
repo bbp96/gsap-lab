@@ -503,6 +503,26 @@
 
     .explanation-box p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1rem; }
 
+    @media (max-width: 800px) {
+      .responsive-stage {
+        padding: 1.5rem 1rem;
+        min-height: auto;
+      }
+      .cards-track {
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .stage-card {
+        min-width: 100%;
+        padding: 1.5rem 1.25rem;
+      }
+      .hud-box {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+    }
+
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       background: var(--bg-surface);
@@ -790,6 +810,12 @@
     </section>
 
     <!-- Stage Track Arena -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+      <button class="btn-replay" id="btnReplay" style="padding: 0.5rem 1rem; font-family: var(--font-code); font-size: 0.78rem; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg-surface-elevated); color: #fff; cursor: pointer;">
+        ↻ Replay Animación
+      </button>
+    </div>
+
     <section class="responsive-stage" id="stageContainer">
       <div class="cards-track" id="cardsTrack">
         <article class="stage-card">
@@ -911,60 +937,95 @@
 
       const hudBreakpoint = document.getElementById('hudBreakpoint');
       const hudWidth = document.getElementById('hudWidth');
+      const stageContainer = document.getElementById('stageContainer');
       const cardsTrack = document.getElementById('cardsTrack');
       const cards = document.querySelectorAll('.stage-card');
+      const btnReplay = document.getElementById('btnReplay');
+
+      let isMobileState = false;
 
       const updateWidth = () => {
-        hudWidth.textContent = `${window.innerWidth} px`;
+        if (hudWidth) hudWidth.textContent = `${window.innerWidth} px`;
       };
       window.addEventListener('resize', updateWidth);
       updateWidth();
+
+      const animateCards = (isMobile) => {
+        gsap.killTweensOf(cards);
+        if (isMobile) {
+          gsap.fromTo(cards, {
+            y: 35,
+            opacity: 0
+          }, {
+            y: 0,
+            opacity: 1,
+            stagger: 0.12,
+            duration: 0.75,
+            ease: "power2.out"
+          });
+        } else {
+          gsap.fromTo(cards, {
+            x: 90,
+            opacity: 0
+          }, {
+            x: 0,
+            opacity: 1,
+            stagger: 0.15,
+            duration: 0.9,
+            ease: "power3.out"
+          });
+        }
+      };
 
       const mm = gsap.matchMedia();
 
       // Breakpoint Desktop (> 800px)
       mm.add("(min-width: 801px)", () => {
-        hudBreakpoint.textContent = "Desktop (>800px) — Desplazamiento Horizontal";
-        cardsTrack.style.flexDirection = "row";
+        isMobileState = false;
+        if (hudBreakpoint) hudBreakpoint.textContent = "Desktop (>800px) — Desplazamiento Horizontal";
+        if (cardsTrack) cardsTrack.style.flexDirection = "row";
 
-        gsap.from(cards, {
-          x: 120,
-          opacity: 0,
-          stagger: 0.15,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: cardsTrack,
-            start: "top 85%",
-            once: true
-          }
-        });
+        if (stageContainer && ScrollTrigger.isInViewport(stageContainer)) {
+          animateCards(false);
+        } else {
+          ScrollTrigger.create({
+            trigger: stageContainer,
+            start: "top 75%",
+            once: true,
+            onEnter: () => animateCards(false)
+          });
+        }
       });
 
       // Breakpoint Mobile (<= 800px)
       mm.add("(max-width: 800px)", () => {
-        hudBreakpoint.textContent = "Mobile (<=800px) — Cascada Vertical";
-        cardsTrack.style.flexDirection = "column";
+        isMobileState = true;
+        if (hudBreakpoint) hudBreakpoint.textContent = "Mobile (<=800px) — Cascada Vertical";
+        if (cardsTrack) cardsTrack.style.flexDirection = "column";
 
-        gsap.from(cards, {
-          y: 40,
-          opacity: 0,
-          stagger: 0.12,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: cardsTrack,
-            start: "top 85%",
-            once: true
-          }
-        });
+        if (stageContainer && ScrollTrigger.isInViewport(stageContainer)) {
+          animateCards(true);
+        } else {
+          ScrollTrigger.create({
+            trigger: stageContainer,
+            start: "top 75%",
+            once: true,
+            onEnter: () => animateCards(true)
+          });
+        }
       });
 
       // Accesibilidad: prefers-reduced-motion
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        hudBreakpoint.textContent = "Accesibilidad — Movimiento Reducido (Sin transiciones bruscas)";
+        if (hudBreakpoint) hudBreakpoint.textContent = "Accesibilidad — Movimiento Reducido";
         gsap.set(cards, { opacity: 1, x: 0, y: 0 });
       });
+
+      if (btnReplay) {
+        btnReplay.addEventListener('click', () => {
+          animateCards(isMobileState);
+        });
+      }
     })();
   </script>
 </body>

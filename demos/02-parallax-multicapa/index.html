@@ -1036,12 +1036,14 @@
       const hudL2 = document.getElementById('hudL2');
       const hudL3 = document.getElementById('hudL3');
 
+      const variantBtns = document.querySelectorAll('.btn-variant');
       let mm = gsap.matchMedia();
       let currentMode = 'classic';
 
       const buildParallax = (mode) => {
         currentMode = mode;
         mm.revert(); // Limpiar instancias previas
+        gsap.set([layerBg, layerMid, layerFg], { clearProps: 'all' });
 
         mm.add({
           isDesktop: "(min-width: 769px)",
@@ -1080,6 +1082,8 @@
             tl.to(layerFg, { y: isMobile ? -170 : -600, rotation: isMobile ? 6 : 12, scale: isMobile ? 1.03 : 1.05, ease: 'none' }, 0);
           }
         });
+
+        ScrollTrigger.refresh();
       };
 
       buildParallax('classic');
