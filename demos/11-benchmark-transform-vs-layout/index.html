@@ -322,130 +322,46 @@
     .btn-hamburger.is-open span:nth-child(2) { opacity: 0; }
     .btn-hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* Mobile Drawer Rediseñado (2 Columnas & Cero Obstrucción) */
+    /* Mobile Drawer */
     .mobile-drawer {
-      display: none;
       position: fixed;
-      top: 56px;
+      top: 57px;
       left: 0;
-      right: 0;
-      bottom: 0;
-      height: calc(100dvh - 56px);
+      width: 100%;
+      height: calc(100vh - 57px);
       background: rgba(11, 12, 16, 0.98);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      z-index: 999;
-      padding: 1.25rem 1rem 6rem;
+      backdrop-filter: blur(20px);
+      padding: 1.5rem;
+      display: flex;
       flex-direction: column;
       gap: 0.75rem;
       overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      border-bottom: 1px solid var(--border-strong);
-    }
-
-    .mobile-drawer.is-open {
-      display: flex;
-    }
-
-    .mobile-drawer__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 0.5rem;
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--ease-out);
+      z-index: 999;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 0.25rem;
     }
 
-    .mobile-drawer__title {
-      font-family: var(--font-code);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      color: var(--accent-primary);
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
+    .mobile-drawer.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-drawer__title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
 
-    .mobile-demos-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.45rem;
-    }
-
-    .mobile-nav-card {
+    .mobile-nav-link {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.65rem 0.6rem;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-md);
       color: var(--text-main);
       text-decoration: none;
       font-family: var(--font-code);
-      font-size: 0.72rem;
-      transition: all 0.2s ease;
-      min-width: 0;
+      font-size: 0.82rem;
     }
 
-    .mobile-nav-card:hover, .mobile-nav-card:active {
-      background: var(--bg-surface-elevated);
-      border-color: var(--accent-primary);
-    }
-
-    .mobile-nav-card--active {
-      border-color: var(--accent-primary) !important;
-      background: rgba(6, 182, 212, 0.12) !important;
-      color: #fff;
-    }
-
-    .mobile-nav-card__num {
-      font-weight: 800;
-      color: var(--accent-primary);
-      font-size: 0.72rem;
-      flex-shrink: 0;
-    }
-
-    .mobile-nav-card__name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: var(--text-main);
-    }
-
-    .mobile-drawer__actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-      margin-top: 0.5rem;
-      padding-top: 0.65rem;
-      border-top: 1px solid var(--border-subtle);
-    }
-
-    .mobile-btn-action {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.7rem;
-      border-radius: var(--radius-sm);
-      font-family: var(--font-code);
-      font-size: 0.76rem;
-      font-weight: 700;
-      text-decoration: none;
-      text-align: center;
-    }
-
-    .mobile-btn-action--hub {
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-strong);
-      color: #fff;
-    }
-
-    .mobile-btn-action--wpo {
-      background: transparent;
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-    }
+    .mobile-nav-link--active { border-color: var(--accent-seal); color: var(--accent-seal); }
 
     /* Main Container */
     .page-main {
@@ -745,6 +661,115 @@
       font-size: 0.74rem;
       color: var(--text-dim);
     }
+  
+    /* Mobile Drawer Rediseñado (2 Columnas & Cero Obstrucción) */
+    .mobile-drawer {
+      height: calc(100dvh - 56px) !important;
+      padding: 1.25rem 1rem 6rem !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    .mobile-drawer__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 0.25rem;
+    }
+
+    .mobile-drawer__title {
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .mobile-demos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    .mobile-nav-card {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 0.6rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      transition: all 0.2s ease;
+      min-width: 0;
+    }
+
+    .mobile-nav-card:hover, .mobile-nav-card:active {
+      background: var(--bg-surface-elevated);
+      border-color: var(--accent-primary);
+    }
+
+    .mobile-nav-card--active {
+      border-color: var(--accent-primary) !important;
+      background: rgba(6, 182, 212, 0.12) !important;
+      color: #fff;
+    }
+
+    .mobile-nav-card__num {
+      font-weight: 800;
+      color: var(--accent-primary);
+      font-size: 0.72rem;
+      flex-shrink: 0;
+    }
+
+    .mobile-nav-card__name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-main);
+    }
+
+    .mobile-drawer__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-top: 0.5rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .mobile-btn-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.7rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-code);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .mobile-btn-action--hub {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      color: #fff;
+    }
+
+    .mobile-btn-action--wpo {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
   </style>
 </head>
 <body>
@@ -863,7 +888,7 @@
     </div>
   </header>
 
-      <!-- Mobile Drawer Rediseñado (2 Columnas & 100% Accesible) -->
+  <!-- Mobile Drawer -->
   <div id="mobileDrawer" class="mobile-drawer" aria-hidden="true">
     <div class="mobile-drawer__header">
       <span class="mobile-drawer__title">Catálogo de Demos (12)</span>
@@ -1036,6 +1061,7 @@
           <li><a href="../09-texto-revelado-lineas/index.html"><span class="footer-num">09.</span> Texto Revelado sin Plugins</a></li>
           <li><a href="../10-canvas-secuencia-scroll/index.html"><span class="footer-num">10.</span> Canvas con Secuencia por Scroll</a></li>
           <li><a href="index.html" style="color: var(--accent-seal); font-weight: 600;"><span class="footer-num">11.</span> Benchmark: transform vs top/left</a></li>
+          <li><a href="../12-cursor-magnetico-quickto/index.html"><span class="footer-num">12.</span> Cursor Magnético & quickTo()</a></li>
         </ul>
       </div>
 
@@ -1083,18 +1109,38 @@
       let activeTweens = [];
       let nodes = [];
 
-      // Inicializar nodos en el DOM
+      // Inicializar nodos en el DOM distribuidos uniformemente por todo el escenario
       const initNodes = () => {
         stage.innerHTML = '';
         nodes = [];
         const colors = ['#10B981', '#06B6D4', '#8B5CF6', '#D8442C', '#F59E0B'];
+        const stageW = stage.clientWidth || 800;
+        const stageH = stage.clientHeight || 340;
+        const padX = 25;
+        const padY = 25;
+        const usableW = Math.max(100, stageW - padX * 2);
+        const usableH = Math.max(100, stageH - padY * 2);
+
+        // Disposición en cuadrícula balanceada con dispersión orgánica
+        const cols = Math.max(4, Math.ceil(Math.sqrt(NODE_COUNT * (usableW / usableH))));
+        const rows = Math.ceil(NODE_COUNT / cols);
 
         for (let i = 0; i < NODE_COUNT; i++) {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const baseX = padX + (col / (cols - 1 || 1)) * usableW;
+          const baseY = padY + (row / (rows - 1 || 1)) * usableH;
+          const jitterX = (Math.random() - 0.5) * (usableW / cols) * 0.7;
+          const jitterY = (Math.random() - 0.5) * (usableH / rows) * 0.7;
+
+          const posX = Math.max(padX, Math.min(stageW - padX - 16, baseX + jitterX));
+          const posY = Math.max(padY, Math.min(stageH - padY - 16, baseY + jitterY));
+
           const el = document.createElement('div');
           el.className = 'benchmark-node';
           el.style.backgroundColor = colors[i % colors.length];
-          el.style.left = `${(i * 12) % 700 + 20}px`;
-          el.style.top = `${Math.floor(i / 10) * 40 + 20}px`;
+          el.style.left = `${posX.toFixed(1)}px`;
+          el.style.top = `${posY.toFixed(1)}px`;
           stage.appendChild(el);
           nodes.push(el);
         }
